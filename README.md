@@ -1,16 +1,5 @@
 # UtaYaku
-Learn Japanese with music. Just like Spotify and other music services, read the auto-scrolling lyrics as you listen. When you encounter new vocabulary or grammar or just want to understand what the sentence means, click on the lyric to access the definitions and breakdown of the sentence into its components and grammar. Login to save your song.
-
-I hoep to support **playlist importing** from music services like Spotify and Youtube Music. I also plan on turning it into an app since most people use their phones for music.
-
-The lyric breakdown works through OpenAI api calls, currently, I'm only using my own key for development. I'm still thinking about how I'll pay if I deploy it once ready. I really wish to deploy it. Bur for now I'm adding a database to store already broken down lyrics for each unique song so that a call to the API won't be needed if visiting already broken down songs.
-
-This is a preview of the current state:
-
-https://github.com/user-attachments/assets/da57c91f-9ddb-465b-b28f-708592d18f13
-
-
-
+You should change the model to fit your machine. After a lot of experimentation with lots of models locally (RTX 4080) I still would just prefer OpenAI models. It's much more accurate and a hell lot faster.
 
 #### Installation
 1. Clone the repository and cd into it
