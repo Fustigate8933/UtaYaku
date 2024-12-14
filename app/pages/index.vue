@@ -148,7 +148,7 @@ const fetchMusicData = async () => {
 		const breakdownExists = breakdownExistsData.result
 
 		if (!breakdownExists) {
-			console.log("Breakdown doesn't exist, fetching from OpenAI")
+			console.log("Breakdown doesn't exist, fetching from local llm")
 			breakdown.value = {"Special message": "This song is new in the system, generating breakdown."}
 			phrases.value = ["Special message"]
 			translation.value = "New song detected, generating breakdown."
@@ -168,6 +168,7 @@ const fetchMusicData = async () => {
 						const result = await getBreakDown(buffer)
 						let content = await result.content
 						content = removeMd(content.replace(/\n\s+/g, "")).replace("`", "")
+						console.log(content)
 						content = JSON.parse(content)
 
 						for (let j = 0; j < batchSize; j++){
@@ -205,9 +206,9 @@ const fetchMusicData = async () => {
 			const addBreakdownResultData = await addBreakdownResult.json()
 			console.log(addBreakdownResultData.message)
 
-			const breakdown = ref({"Special message": "Generation complete. Click on a lyric to view breakdown."})
-			const phrases = ref(["Special message"])
-			const translation = ref("Generation complete. Click on a lyric to show translation.")
+			breakdown.value = {"Special message": "Generation complete. Click on a lyric to view breakdown."}
+			phrases.value = ["Special message"]
+			translation.value = "Generation complete. Click on a lyric to show translation."
 
 		} else {
 			console.log("Breakdowns already exists, fetching from database...")
