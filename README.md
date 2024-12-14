@@ -17,5 +17,9 @@ https://github.com/user-attachments/assets/da57c91f-9ddb-465b-b28f-708592d18f13
 2. Run `pnpm install` or `npm install` or the equivalent whatever package manager you prefer.
 3. Create a .env file in the root directory with `CLIENT_ID=<your client id from app.musicapi.com>`
 4. add `OPENAI_API_KEY=<your openai key that supports gpt4-o` as an environment variable
-5. pnpm run dev
-6. access the website on http://localhost:3000/
+5. cd into the backend directory and run `pip install -r requirements.txt`
+
+#### Usage
+1. `pnpm run dev`
+2. on a separate shell in the backend directory, `python main.py`
+3. access the website on http://localhost:3000/
