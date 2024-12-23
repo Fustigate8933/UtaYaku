@@ -62,8 +62,8 @@ const embedReady = ref(false)
 
 const { getBreakDown } = useBreakDown()
 
-const song_name = "Insomnia"
-const artist_name = "Eve"
+const song_name = ref("Fetching song name")
+const artist_name = ref("Fetching artist name")
 
 function timestampToMS(timestamp: string){
 	const [minutes, seconds, milliseconds] = timestamp.slice(1, -1).split(/[:.]/).map(Number)
@@ -88,31 +88,21 @@ const filterTimestamps = (rawSynced: Array<string>) => {
 }
 
 const fetchMusicData = async () => {
-	const embeddingResponse = await fetch("/api/musicapi", {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ song_name, artist_name })
-	})
-	const embeddingResponseData = await embeddingResponse.json()
-	const trackUrl = embeddingResponseData.url
-
-	const lyricsResponse = await fetch(`https://lrclib.net/api/search?track_name=${song_name}&artist_name=${artist_name}`)
-
+	const lyricsResponse = await fetch(`https://lrclib.net/api/get/${lyricId}`)
 	if (!lyricsResponse.ok) {
-		lyrics.value = [`No song with name ${song_name} and artist ${artist_name} could be found.`]
-		throw new Error(`No song with name ${song_name} and artist ${artist_name} could be found.`)
+		throw new Error(`No song with id ${lyricId} could be found.`)
 	}
 
 	const lyricsData = await lyricsResponse.json()
 	if (lyricsData.length === 0) {
-		lyrics.value = [`No song with name ${song_name} and artist ${artist_name} could be found.`]
+		throw new Error(`No song with id ${lyricId} could be found.`)
 	}
 
-	const most_related = lyricsData[0]
-	const rawLyrics = most_related.plainLyrics.split("\n")
-	const rawSynced = most_related.syncedLyrics.split("\n").slice(0, -1)
+	song_name.value = lyricsData.trackName
+	artist_name.value = lyricsData.artistName
+
+	const rawLyrics = lyricsData.plainLyrics.split("\n")
+	const rawSynced = lyricsData.syncedLyrics.split("\n").slice(0, -1)
 	timestamps.value = filterTimestamps(rawSynced)
 	const l = rawLyrics.length
 	let indices = new Array<number>
@@ -128,6 +118,16 @@ const fetchMusicData = async () => {
 	lyrics.value = rawLyrics
 	lyricsIndices.value = indices
 	fetchedLyrics.value = true
+
+	const embeddingResponse = await fetch("/api/musicapi", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ song_name: song_name.value, artist_name: artist_name.value })
+	})
+	const embeddingResponseData = await embeddingResponse.json()
+	const trackUrl = embeddingResponseData.url
 
 	try {
 		initializeSpotifyEmbed(trackUrl)
