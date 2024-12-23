@@ -29,15 +29,17 @@
 					:key="i"
 					class="border-2 rounded-xl border-[#4d4e51] p-4"
 				>
-					<h1 class="font-bold">
-						{{ candidate.trackName }}
-					</h1>
-					<h1 class="text-[#C5D3E8]">
-						Artist: {{ candidate.artistName }}
-					</h1>
-					<h1 class="text-[#FFDDAE]">
-						Album: {{ candidate.albumName }}
-					</h1>
+					<NuxtLink :to="`/${candidate.id}`">
+						<h1 class="font-bold">
+							{{ candidate.trackName }}
+						</h1>
+						<h1 class="text-[#C5D3E8]">
+							Artist: {{ candidate.artistName }}
+						</h1>
+						<h1 class="text-[#FFDDAE]">
+							Album: {{ candidate.albumName }}
+						</h1>
+					</NuxtLink>
 				</div>
 			</div>
 		</div>
