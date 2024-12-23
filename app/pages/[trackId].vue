@@ -42,6 +42,9 @@
 </template>
 
 <script setup lang="ts">
+const route = useRoute()
+const trackId = route.params.trackId
+
 import removeMd from 'remove-markdown'
 
 const lyrics = ref([])
