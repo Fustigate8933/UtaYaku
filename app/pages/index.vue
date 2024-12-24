@@ -1,25 +1,26 @@
 <template>
 	<div class="flex items-center flex-col justify-center h-full w-full gap-5">
 		<div class="max-w-4xl flex items-center flex-col justify-center h-full w-full gap-5 py-[4rem]">
-			<div class="w-full flex gap-10 text-center justify-center">
+			<div class="w-full flex gap-10 text-center justify-center text-lg">
 				<div class="flex flex-col gap-1">
-					<label>Song</label>
-					<input v-model="song_name" class="rounded-lg p-2 text-black" type="text" placeholder="Song name" />
+					<label>曲 <span class="text-sm text-gray-400">(Song)</span></label>
+					<input v-model="song_name" class="rounded-lg p-2 text-black" type="text" placeholder="曲名" />
 				</div>
 				<div class="flex flex-col gap-1">
-					<label>Artist</label>
-					<input v-model="artist_name" class="rounded-lg p-2 text-black" type="text" placeholder="Artist name" />
+					<label>アーティスト <span class="text-sm text-gray-400">(Artist)</span></label>
+					<input v-model="artist_name" class="rounded-lg p-2 text-black" type="text" placeholder="アーティスト名" />
 				</div>
 				<div class="flex flex-col gap-1">
-					<label class="invisible">Easter egg!</label>
-					<button class="h-full rounded-lg hover:cursor-pointer hover:bg-gray-900 border-2" @click="getMetaData">Search</button>
+					<!-- <label class="invisible">Easter egg!</label> -->
+					<label class="w-[100px]"><span class="text-sm text-gray-400">(Search)</span></label>
+					<button class="h-full rounded-lg hover:cursor-pointer border-2 border-gray-400 hover:border-white" @click="getMetaData">検索</button>
 				</div>
 			</div>
 			<div v-if="fetchingMetaData" class="flex items-center gap-3">
 				<Shuriken size="25px" />
 				<h1>Fetching {{ song_name }} {{ artist_name !== "" ? `by ${artist_name}` : "" }}</h1>
 			</div>
-			<div class="w-full flex flex-col gap-5">
+			<div class="w-full flex flex-col gap-5 overflow-y-auto">
 				<div v-if="noTracksFound">
 					<h1 class="text-center">No tracks could be found.</h1>
 				</div>

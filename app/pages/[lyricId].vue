@@ -81,7 +81,9 @@ const filterTimestamps = (rawSynced: Array<string>) => {
 	const l = matches.length
 	let timeStampPairs = new Array<Array<number>>
 	for (let i = 0; i < l - 1; i++){
-		timeStampPairs.push([matches[i]!, matches[i + 1]!])
+		if (rawSynced[i]!.length > 11){ // not empty
+			timeStampPairs.push([matches[i]!, matches[i + 1]!])
+		}
 	}
 	timeStampPairs.push([matches[l - 1]!, matches[l - 1]! + 5])
 	return timeStampPairs
@@ -156,7 +158,7 @@ const fetchMusicData = async () => {
 			phrases.value = ["Special message"]
 			translation.value = "New song detected, generating breakdown."
 
-			const batchSize = 22
+			const batchSize = 15
 			let buffer = ""
 			let bufferCount = 0
 			for (let i = 0; i < l; i++){
@@ -294,13 +296,13 @@ const handleLineClick = (i: number) => {
 }
 
 const isCurLyric = (i: number) => {
-		const playbackInSeconds = Math.floor(playbackTime.value / 1000)
-    return i !== -1 && timestamps.value[i][0] <= playbackInSeconds && playbackInSeconds < timestamps.value[i][1]
+	const playbackInSeconds = Math.floor(playbackTime.value / 1000)
+	return i !== -1 && (timestamps.value[i][0] <= playbackInSeconds) && (playbackInSeconds < timestamps.value[i][1])
 }
 
 watch(playbackTime, (newPlaybackTime:number , oldPlaybackTime: number) => {
 	const playbackInSeconds = Math.floor(newPlaybackTime / 1000)
-	const currentIndex = timestamps.value.findIndex(
+	let currentIndex = timestamps.value.findIndex(
 		([start, end]: [number, number]) => start <= playbackInSeconds && playbackInSeconds < end
 	)
 
@@ -317,6 +319,10 @@ watch(playbackTime, (newPlaybackTime:number , oldPlaybackTime: number) => {
 		}
 
 		document.getElementById(`${currentIndex}`)!.scrollIntoView({ behavior: "smooth", block: "center" })
+	} else {
+			breakdown.value = { "Music": "🎶" }
+			phrases.value = ["Music"]
+			translation.value = "🎶"
 	}
 })
 
