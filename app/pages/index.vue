@@ -47,8 +47,8 @@
 </template>
 
 <script setup lang="ts">
-const song_name = ref("Insomnia")
-const artist_name = ref("Eve")
+const song_name = ref("")
+const artist_name = ref("")
 const trackCandidates = ref([])
 const fetchingMetaData = ref(false)
 const noTracksFound = ref(false)
