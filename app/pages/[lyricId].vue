@@ -21,7 +21,7 @@
 					:key="i"
 					@click="handleLineClick(lyricsIndices[i])"
 				>
-					{{ lyric_line }}
+					{{ lyric_line === "" ? "♪" : lyric_line }}
 				</p>
 			</div>
 			<div v-else>
