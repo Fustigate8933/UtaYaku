@@ -291,7 +291,7 @@ const handleLineClick = (i: number) => {
 
 	const newTime = timestamps.value[i][0]
 	if (embedController) {
-		embedController.seek(newTime + offset)
+		embedController.seek(newTime + offset.value)
 	} else {
 		console.error("Embed Controller not initialized")
 	}
