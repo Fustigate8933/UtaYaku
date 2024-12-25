@@ -65,6 +65,8 @@ const { getBreakDown } = useBreakDown()
 const song_name = ref("Fetching song name")
 const artist_name = ref("Fetching artist name")
 
+const offset = ref(1)
+
 function timestampToMS(timestamp: string){
 	const [minutes, seconds, milliseconds] = timestamp.slice(1, -1).split(/[:.]/).map(Number)
 	let ans
@@ -289,7 +291,7 @@ const handleLineClick = (i: number) => {
 
 	const newTime = timestamps.value[i][0]
 	if (embedController) {
-		embedController.seek(newTime)
+		embedController.seek(newTime + offset)
 	} else {
 		console.error("Embed Controller not initialized")
 	}
@@ -297,13 +299,13 @@ const handleLineClick = (i: number) => {
 
 const isCurLyric = (i: number) => {
 	const playbackInSeconds = Math.floor(playbackTime.value / 1000)
-	return i !== -1 && (timestamps.value[i][0] <= playbackInSeconds) && (playbackInSeconds < timestamps.value[i][1])
+	return i !== -1 && (timestamps.value[i][0] <= playbackInSeconds - offset.value) && (playbackInSeconds - offset.value < timestamps.value[i][1])
 }
 
 watch(playbackTime, (newPlaybackTime:number , oldPlaybackTime: number) => {
 	const playbackInSeconds = Math.floor(newPlaybackTime / 1000)
 	let currentIndex = timestamps.value.findIndex(
-		([start, end]: [number, number]) => start <= playbackInSeconds && playbackInSeconds < end
+		([start, end]: [number, number]) => start <= playbackInSeconds - offset.value && playbackInSeconds - offset.value < end
 	)
 
 	if (currentIndex !== -1) {
