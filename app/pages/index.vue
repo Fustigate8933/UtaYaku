@@ -13,7 +13,7 @@
 				<div class="flex flex-col gap-1">
 					<!-- <label class="invisible">Easter egg!</label> -->
 					<label class="w-[100px]"><span class="text-sm text-gray-400">(Search)</span></label>
-					<button class="h-full rounded-lg hover:cursor-pointer border-2 border-gray-400 hover:border-white" @click="getMetaData">検索</button>
+					<button class="h-full rounded-lg hover:cursor-pointer border-2 border-gray-400 hover:border-white active:border-gray-400" @click="getMetaData">検索</button>
 				</div>
 			</div>
 			<div v-if="fetchingMetaData" class="flex items-center gap-3">
