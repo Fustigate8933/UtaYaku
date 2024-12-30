@@ -4,11 +4,11 @@
 			<div class="w-full flex gap-10 text-center justify-center text-lg">
 				<div class="flex flex-col gap-1">
 					<label>曲 <span class="text-sm text-gray-400">(Song)</span></label>
-					<input v-model="song_name" class="rounded-lg p-2 text-black" type="text" placeholder="曲名" />
+					<input v-model="song_name" class="rounded-lg p-2 text-black" type="text" placeholder="曲名" @keyup.enter="getMetaData" />
 				</div>
 				<div class="flex flex-col gap-1">
 					<label>アーティスト <span class="text-sm text-gray-400">(Artist)</span></label>
-					<input v-model="artist_name" class="rounded-lg p-2 text-black" type="text" placeholder="アーティスト名" />
+					<input v-model="artist_name" class="rounded-lg p-2 text-black" type="text" placeholder="アーティスト名" @keyup.enter="getMetaData" />
 				</div>
 				<div class="flex flex-col gap-1">
 					<!-- <label class="invisible">Easter egg!</label> -->
