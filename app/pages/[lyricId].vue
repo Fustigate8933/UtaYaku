@@ -4,7 +4,7 @@
 			<div class="flex gap-3 items-baseline border-white border-b"> <h1 class="text-5xl text-yellow-100">{{song_name}}</h1>
 				<h1 class="text-xl text-orange-200">({{artist_name}})</h1>
 			</div>
-			<div class="w-full h-[600px] p-4 overflow-y-auto border-[#4d4e51] border-2 rounded-xl">
+			<div class="w-full h-40 p-4 overflow-y-auto border-[#4d4e51] border-2 rounded-xl resize-y flex-shrink-0 max-h-96">
 				<h1 v-for="(key, i) in phrases" :key="i">
 					{{ key }}: {{ breakdown[key] }}
 				</h1>
