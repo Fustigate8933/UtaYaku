@@ -12,7 +12,7 @@
 					Regenerate
 				</button>
 				<h1 v-for="(key, i) in phrases" :key="i">
-					{{ key }}: {{ breakdown[key] }}
+					<span class="text-[#bfe3b4]">{{ key }}</span>: {{ breakdown[key] }}
 				</h1>
 				<h1>
 					<span class="text-orange-200">Translation</span>: {{ translation }}
