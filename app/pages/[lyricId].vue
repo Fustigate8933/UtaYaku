@@ -4,7 +4,13 @@
 			<div class="flex gap-3 items-baseline border-white border-b"> <h1 class="text-5xl text-yellow-100">{{song_name}}</h1>
 				<h1 class="text-xl text-orange-200">({{artist_name}})</h1>
 			</div>
-			<div class="w-full h-40 p-4 overflow-y-auto border-[#4d4e51] border-2 rounded-xl resize-y flex-shrink-0 max-h-96">
+			<div class="w-full h-40 p-4 overflow-y-auto border-[#4d4e51] border-2 rounded-xl resize-y flex-shrink-0 max-h-96 relative">
+				<button 
+					class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
+					@click="regenerateBreakdowns"
+				>
+					Regenerate
+				</button>
 				<h1 v-for="(key, i) in phrases" :key="i">
 					{{ key }}: {{ breakdown[key] }}
 				</h1>
@@ -49,6 +55,7 @@ import removeMd from 'remove-markdown'
 
 const lyrics = ref([])
 const lyricsIndices = ref([])
+const externalId = ref("")
 const timestamps = ref([]) // in pairs format [start, end]
 const playbackTime = ref(0)
 const breakdown = ref({"Special message": "Click on a lyric to show breakdown!"})
@@ -89,6 +96,20 @@ const filterTimestamps = (rawSynced: Array<string>) => {
 	}
 	timeStampPairs.push([matches[l - 1]!, matches[l - 1]! + 5])
 	return timeStampPairs
+}
+
+const regenerateBreakdowns = async () => {
+	const deleteBreakdownResult = await fetch("/api/deleteBreakdown", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ musicId: externalId.value })
+	})
+	const deleteBreakdownResultData = await deleteBreakdownResult.json()
+	console.log(deleteBreakdownResultData.message)
+
+	reloadNuxtApp()
 }
 
 const fetchMusicData = async () => {
@@ -132,6 +153,7 @@ const fetchMusicData = async () => {
 	})
 	const embeddingResponseData = await embeddingResponse.json()
 	const trackUrl = embeddingResponseData.url
+	externalId.value = embeddingResponseData.externalId
 
 	try {
 		initializeSpotifyEmbed(trackUrl)
@@ -149,7 +171,7 @@ const fetchMusicData = async () => {
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ musicId: embeddingResponseData.externalId })
+			body: JSON.stringify({ musicId: externalId.value })
 		})
 		const breakdownExistsData = await breakdownExistsResult.json()
 		const breakdownExists = breakdownExistsData.result

@@ -1,7 +1,6 @@
 export default defineEventHandler(async (event) => {
 	const { musicId } = await readBody(event)
-
-	console.log(musicId)
+	console.log("Attempting to delete ", musicId)
 
 	try {
 		const db = useDatabase("breakdowns")
@@ -19,23 +18,22 @@ export default defineEventHandler(async (event) => {
 			FOREIGN KEY (song_id) REFERENCES Song(song_id)
 		)`
 
-		const exists = await db.sql`
-			SELECT COUNT(*)
-			FROM Song
+		await db.sql`
+			DELETE FROM Breakdowns
 			WHERE song_id = ${musicId}
-		`
+		`;
 
-		const count = exists.rows![0]["COUNT(*)"]
-		console.log(count, "found")
-		if (count === 1){
-			return { result: true }
-		} else {
-			return { result: false }
-		}
-
+		await db.sql`
+			DELETE FROM Song
+			WHERE song_id = ${musicId}
+		`;
+		
+		console.log("Deletion successful.")
+		return { message: "Song deleted successfully" }
 	} catch (error) {
+		console.log("Deletion failed.")
 		console.error(error)
-		return { message: "Add breakdown operation failed" }
+		return { message: "Song deletion failed" }
 	}
 })
 
