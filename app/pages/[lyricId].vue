@@ -200,7 +200,7 @@ const fetchMusicData = async () => {
 			
 			generatingBreakdowns.value = true
 
-			const batchSize = 8
+			const batchSize = 7
 			batchesNeeded.value = Math.ceil(l / batchSize)
 			let buffer = ""
 			let bufferCount = 0
