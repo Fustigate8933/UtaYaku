@@ -7,7 +7,7 @@
 			<div class="w-full h-40 p-4 overflow-y-auto border-[#4d4e51] border-2 rounded-xl resize-y flex-shrink-0 max-h-96 relative">
 				<div v-if="generatingBreakdowns">
 					<div class="flex justify-between mb-2">
-						<h1 class="bg-gradient-to-r from-gray-200 via-gray-400 to-gray-50 inline-block text-transparent bg-clip-text">Generating breakdowns (this may take a while) ...</h1>
+						<h1 class="bg-gradient-to-r from-gray-200 via-gray-400 to-gray-50 inline-block text-transparent bg-clip-text">Generating breakdowns (this may take up to 3 minutes, do not refresh the page) ...</h1>
 						<h1 class="text-white">{{progress}}%</h1>
 					</div>
 					<div class="w-full rounded-full h-2 bg-gray-700">
