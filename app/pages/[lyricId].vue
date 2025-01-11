@@ -177,14 +177,15 @@ const fetchMusicData = async () => {
 		const breakdownExists = breakdownExistsData.result
 
 		if (!breakdownExists) {
-			console.log("Breakdown doesn't exist, fetching from OpenAI")
+			console.log("Breakdown doesn't exist, fetching from backend.")
 			breakdown.value = {"Special message": "This song is new in the system, generating breakdown."}
 			phrases.value = ["Special message"]
 			translation.value = "New song detected, generating breakdown."
 
-			const batchSize = 15
+			const batchSize = 6
 			let buffer = ""
 			let bufferCount = 0
+			let batchCount = 1
 			for (let i = 0; i < l; i++){
 				if (rawLyrics[i] !== ""){
 					buffer += rawLyrics[i] + "\n"
@@ -193,18 +194,17 @@ const fetchMusicData = async () => {
 						if (buffer.endsWith("\n")){
 							buffer = buffer.slice(0, -1)
 						}
-						console.log("Fetching break down batch...")
+
+						console.log(`Processing batch ${batchCount}`)
 						const result = await getBreakDown(buffer)
-						let content = await result.content
-						content = removeMd(content.replace(/\n\s+/g, "")).replace("`", "")
-						content = JSON.parse(content)
 
 						for (let j = 0; j < batchSize; j++){
-							allBreakdowns.value.push(content[j])
+							allBreakdowns.value.push(result[j])
 						}
 
 						buffer = ""
 						bufferCount = 0
+						batchCount += 1
 					}
 				}
 			}

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from system_prompt import system_prompt
 from hugchat import hugchat
@@ -33,5 +34,10 @@ class GenRequest(BaseModel):
 
 @app.post("/")
 async def generate_breakdown(request: GenRequest):
-    message = chatbot.chat(request.query).wait_until_done()
-    return message
+    print("Processing request...")
+    try:
+        message = chatbot.chat(request.query).wait_until_done()
+    except Exception as e:
+        print("An error has occured while processing the request with hugchat: ", e)
+
+    return JSONResponse({"breakdown": message})

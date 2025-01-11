@@ -1,20 +1,17 @@
-import { OpenAI } from "openai"
-
-const client = new OpenAI({
-  baseURL: "http://0.0.0.0:8000/v1",
-})
-
 export default defineEventHandler(async (event) => {
-	const { history } = await readBody(event)
+	const { req } = await readBody(event)
 
-	console.log("Fetching break down from local llm...")
+	console.log("Fetching break down from hugchat...")
 
-	const completion = await client.chat.completions.create({
-		model: "Qwen/Qwen2.5-14B-Instruct",
-		messages: history,
-		stream: false
+	const response = await fetch("http://localhost:8000/", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ query: req })
 	})
+	const data = await response.json()
 
-	return completion.choices[0].message
+	return data.breakdown
 })
 
