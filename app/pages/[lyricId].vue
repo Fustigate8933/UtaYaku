@@ -5,18 +5,29 @@
 				<h1 class="text-xl text-orange-200">({{artist_name}})</h1>
 			</div>
 			<div class="w-full h-40 p-4 overflow-y-auto border-[#4d4e51] border-2 rounded-xl resize-y flex-shrink-0 max-h-96 relative">
-				<button 
-					class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
-					@click="regenerateBreakdowns"
-				>
-					Regenerate
-				</button>
-				<h1 v-for="(key, i) in phrases" :key="i">
-					<span class="text-[#bfe3b4]">{{ key }}</span>: {{ breakdown[key] }}
-				</h1>
-				<h1>
-					<span class="text-orange-200">Translation</span>: {{ translation }}
-				</h1>
+				<div v-if="generatingBreakdowns">
+					<div class="flex justify-between mb-2">
+						<h1 class="bg-gradient-to-r from-gray-200 via-gray-400 to-gray-50 inline-block text-transparent bg-clip-text">Generating breakdowns (this may take a while) ...</h1>
+						<h1 class="text-white">{{progress}}%</h1>
+					</div>
+					<div class="w-full rounded-full h-2 bg-gray-700">
+						<div class="bg-gray-300 h-2 rounded-full" :style="{'width': `${progress}%`}"></div>
+					</div>
+				</div>
+				<div v-else>
+					<button 
+						class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
+						@click="regenerateBreakdowns"
+					>
+						Regenerate
+					</button>
+					<h1 v-for="(key, i) in phrases" :key="i">
+						<span class="text-[#bfe3b4]">{{ key }}</span>: {{ breakdown[key] }}
+					</h1>
+					<h1>
+						<span class="text-orange-200">Translation</span>: {{ translation }}
+					</h1>
+				</div>
 			</div>
 			<div v-if="fetchedLyrics" class="flex flex-col text-[#F5F5F5bb] text-2xl overflow-y-auto gap-3 w-full p-4">
 				<p
@@ -62,6 +73,11 @@ const breakdown = ref({"Special message": "Click on a lyric to show breakdown!"}
 const phrases = ref(["Special message"])
 const translation = ref("Click on a lyric to show translation!")
 const allBreakdowns = ref([])
+
+const generatingBreakdowns = ref(false)
+const batchesNeeded = ref(0)
+const batchCount = ref(0)
+const progress = ref(0)
 
 const fetchedLyrics = ref(false)
 const fetchedBreakdowns = ref(false)
@@ -181,11 +197,13 @@ const fetchMusicData = async () => {
 			breakdown.value = {"Special message": "This song is new in the system, generating breakdown."}
 			phrases.value = ["Special message"]
 			translation.value = "New song detected, generating breakdown."
+			
+			generatingBreakdowns.value = true
 
-			const batchSize = 6
+			const batchSize = 8
+			batchesNeeded.value = Math.ceil(l / batchSize)
 			let buffer = ""
 			let bufferCount = 0
-			let batchCount = 1
 			for (let i = 0; i < l; i++){
 				if (rawLyrics[i] !== ""){
 					buffer += rawLyrics[i] + "\n"
@@ -195,7 +213,7 @@ const fetchMusicData = async () => {
 							buffer = buffer.slice(0, -1)
 						}
 
-						console.log(`Processing batch ${batchCount}`)
+						console.log(`Processing batch ${batchCount.value}`)
 						const result = await getBreakDown(buffer)
 
 						for (let j = 0; j < batchSize; j++){
@@ -204,7 +222,9 @@ const fetchMusicData = async () => {
 
 						buffer = ""
 						bufferCount = 0
-						batchCount += 1
+						batchCount.value += 1
+						progress.value = Math.floor(batchCount.value / batchesNeeded.value * 100)
+						console.log("progress: ", progress.value)
 					}
 				}
 			}
@@ -213,14 +233,15 @@ const fetchMusicData = async () => {
 				if (buffer.endsWith("\n")){
 					buffer = buffer.slice(0, -1)
 				}
+				console.log("Processing last batch")
 				const result = await getBreakDown(buffer)
-				let content = await result.content
-				content = removeMd(content.replace(/\n\s+/g, "")).replace("`", "")
-				content = JSON.parse(content)
 
 				for (let j = 0; j < bufferCount; j++){
-					allBreakdowns.value.push(content[j])
+					allBreakdowns.value.push(result[j])
 				}
+
+				batchCount.value += 1
+				progress.value = Math.floor(batchCount.value / batchesNeeded.value * 100)
 			}
 
 			// store breakdowns in to the database to prevent repeated future model queries
@@ -237,7 +258,8 @@ const fetchMusicData = async () => {
 			breakdown.value = {"Special message": "Generation complete. Click on a lyric to view breakdown."}
 			phrases.value = ["Special message"]
 			translation.value = "Generation complete. Click on a lyric to show translation."
-
+			
+			generatingBreakdowns.value = false
 		} else {
 			console.log("Breakdowns already exists, fetching from database...")
 			const fetchedBreakdownResult = await fetch("/api/getBreakdown", {
