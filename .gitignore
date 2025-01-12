@@ -5,3 +5,4 @@ node_modules
 cookies
 backend/.env
 backend/cookies
+backend/__pycache__
