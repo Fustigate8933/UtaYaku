@@ -314,6 +314,10 @@ const fetchMusicData = async () => {
 		}
 	}catch (error) {
 		console.error("Error fetching breakdown: \n", error)
+		breakdown.value = {"Special message": "Generation failed. You can try regenerating it by pressing the button on the top right."}
+		phrases.value = ["Special message"]
+		translation.value = "Generation failure."
+		generatingBreakdowns.value = false
 	}
 }
 
