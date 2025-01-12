@@ -191,76 +191,21 @@ const fetchMusicData = async () => {
 		})
 		const breakdownExistsData = await breakdownExistsResult.json()
 		const breakdownExists = breakdownExistsData.result
-
-		if (!breakdownExists) {
-			console.log("Breakdown doesn't exist, fetching from backend.")
-			breakdown.value = {"Special message": "This song is new in the system, generating breakdown."}
-			phrases.value = ["Special message"]
-			translation.value = "New song detected, generating breakdown."
-			
-			generatingBreakdowns.value = true
-
-			const batchSize = 7
-			batchesNeeded.value = Math.ceil(l / batchSize)
-			let buffer = ""
-			let bufferCount = 0
-			for (let i = 0; i < l; i++){
-				if (rawLyrics[i] !== ""){
-					buffer += rawLyrics[i] + "\n"
-					bufferCount++
-					if (bufferCount === batchSize){
-						if (buffer.endsWith("\n")){
-							buffer = buffer.slice(0, -1)
-						}
-
-						console.log(`Processing batch ${batchCount.value}`)
-						const result = await getBreakDown(buffer)
-
-						for (let j = 0; j < batchSize; j++){
-							allBreakdowns.value.push(result[j])
-						}
-
-						buffer = ""
-						bufferCount = 0
-						batchCount.value += 1
-						progress.value = Math.floor(batchCount.value / batchesNeeded.value * 100)
-						console.log("progress: ", progress.value)
-					}
-				}
+		
+		let email = ""
+		let password = ""
+		if (process.client) {
+			const hugEmail = localStorage.getItem("hugEmail")
+			if (hugEmail !== null){
+				email = hugEmail
 			}
-
-			if (bufferCount > 0){
-				if (buffer.endsWith("\n")){
-					buffer = buffer.slice(0, -1)
-				}
-				console.log("Processing last batch")
-				const result = await getBreakDown(buffer)
-
-				for (let j = 0; j < bufferCount; j++){
-					allBreakdowns.value.push(result[j])
-				}
-
-				batchCount.value += 1
-				progress.value = Math.floor(batchCount.value / batchesNeeded.value * 100)
+			const hugPassword = localStorage.getItem("hugSecret")
+			if (hugPassword !== null){
+				password = hugPassword
 			}
+		}
 
-			// store breakdowns in to the database to prevent repeated future model queries
-			const addBreakdownResult = await fetch("/api/addBreakdown", {
-				method: "POST",
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ allBreakdowns: allBreakdowns.value, musicId: embeddingResponseData.externalId })
-			})
-			const addBreakdownResultData = await addBreakdownResult.json()
-			console.log(addBreakdownResultData.message)
-
-			breakdown.value = {"Special message": "Generation complete. Click on a lyric to view breakdown."}
-			phrases.value = ["Special message"]
-			translation.value = "Generation complete. Click on a lyric to show translation."
-			
-			generatingBreakdowns.value = false
-		} else {
+		if (breakdownExists) {
 			console.log("Breakdowns already exists, fetching from database...")
 			const fetchedBreakdownResult = await fetch("/api/getBreakdown", {
 				method: "POST",
@@ -272,6 +217,100 @@ const fetchMusicData = async () => {
 			const fetchedBreakdownData = await fetchedBreakdownResult.json()
 			console.log(fetchedBreakdownData.breakdowns)
 			allBreakdowns.value = fetchedBreakdownData.breakdowns
+		} else if (email === "" || password === "") {
+			breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
+			phrases.value = ["Special message"]
+			translation.value = "Your HuggingChat credentials were incorrect."
+		} else {
+			console.log("Breakdown doesn't exist, fetching from backend.")
+			breakdown.value = {"Special message": "This song is new in the system, generating breakdown."}
+			phrases.value = ["Special message"]
+			translation.value = "New song detected, generating breakdown."
+			
+			generatingBreakdowns.value = true
+
+			const batchSize = 7
+			batchesNeeded.value = Math.ceil(l / batchSize)
+			let buffer = ""
+			let bufferCount = 0
+			let success = true // no errors during breakdown fetch
+			for (let i = 0; i < l; i++){
+				if (rawLyrics[i] !== ""){
+					buffer += rawLyrics[i] + "\n"
+					bufferCount++
+					if (bufferCount === batchSize){
+						if (buffer.endsWith("\n")){
+							buffer = buffer.slice(0, -1)
+						}
+
+						console.log(`Processing batch ${batchCount.value}`)
+						const result = await getBreakDown(buffer, email, password)
+						if (result === "wrong username or password"){
+							breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
+							phrases.value = ["Special message"]
+							translation.value = "Your HuggingChat credentials were incorrect."
+							success = false
+							break
+						}
+
+						const content = JSON.parse(result)
+
+						for (let j = 0; j < batchSize; j++){
+							allBreakdowns.value.push(content[j])
+						}
+
+						buffer = ""
+						bufferCount = 0
+						batchCount.value += 1
+						progress.value = Math.floor(batchCount.value / batchesNeeded.value * 100)
+						console.log("progress: ", progress.value)
+					}
+				}
+			}
+
+			if (success && bufferCount > 0){
+				if (buffer.endsWith("\n")){
+					buffer = buffer.slice(0, -1)
+				}
+
+				console.log(`Processing batch ${batchCount.value}`)
+				const result = await getBreakDown(buffer, email, password)
+
+				if (result === "wrong username or password"){
+					breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
+					phrases.value = ["Special message"]
+					translation.value = "Your HuggingChat credentials were incorrect."
+					success = false
+				} else {
+					const content = JSON.parse(result)
+
+					for (let j = 0; j < batchSize; j++){
+						allBreakdowns.value.push(content[j])
+					}
+
+					batchCount.value += 1
+					progress.value = Math.floor(batchCount.value / batchesNeeded.value * 100)
+				}
+			}
+
+			// store breakdowns in to the database to prevent repeated future model queries
+			if (success){
+				const addBreakdownResult = await fetch("/api/addBreakdown", {
+					method: "POST",
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ allBreakdowns: allBreakdowns.value, musicId: embeddingResponseData.externalId })
+				})
+				const addBreakdownResultData = await addBreakdownResult.json()
+				console.log(addBreakdownResultData.message)
+
+				breakdown.value = {"Special message": "Generation complete. Click on a lyric to view breakdown."}
+				phrases.value = ["Special message"]
+				translation.value = "Generation complete. Click on a lyric to show translation."
+			}
+
+			generatingBreakdowns.value = false
 		}
 	}catch (error) {
 		console.error("Error fetching breakdown: \n", error)

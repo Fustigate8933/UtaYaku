@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-	const { req } = await readBody(event)
+	const { req, email, password } = await readBody(event)
 
 	console.log("Fetching break down from hugchat...")
 
@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 		headers: {
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify({ query: req })
+		body: JSON.stringify({ query: req, email: email, password: password })
 	})
 	const data = await response.json()
 
