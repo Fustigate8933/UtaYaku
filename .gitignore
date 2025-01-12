@@ -2,4 +2,6 @@
 node_modules
 .nuxt
 .data
+cookies
 backend/.env
+backend/cookies
