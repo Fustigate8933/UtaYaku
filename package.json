@@ -17,6 +17,8 @@
     "@nuxtjs/tailwindcss": "^6.12.2",
     "better-sqlite3": "^11.7.0",
     "install": "^0.13.0",
+	"kuroshiro": "~1.1.2",
+    "kuroshiro-analyzer-kuromoji": "^1.1.0",
     "nuxt": "^3.14.159",
     "openai": "^4.73.1",
     "remove-markdown": "^0.5.5",

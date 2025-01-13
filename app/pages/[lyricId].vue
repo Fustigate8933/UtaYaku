@@ -29,17 +29,32 @@
 					</h1>
 				</div>
 			</div>
-			<div v-if="fetchedLyrics" class="flex flex-col text-[#F5F5F5bb] text-2xl overflow-y-auto gap-3 w-full p-4">
-				<p
-					v-for="(lyric_line, i) in lyrics"
-					class="cursor-pointer"
-					:class="{ 'text-yellow-100 font-bold': isCurLyric(lyricsIndices[i]) }"
-					:id="lyricsIndices[i]"
-					:key="i"
-					@click="handleLineClick(lyricsIndices[i])"
-				>
-					{{ lyric_line === "" ? "♪" : lyric_line }}
-				</p>
+			<div v-if="fetchedLyrics" class="overflow-y-auto w-full">
+				<div v-if="furigana" class="flex flex-col text-[#F5F5F5bb] text-2xl gap-3 p-4">
+					<div
+						v-for="(furiganaLine, i) in furiganalyzedLyrics"
+						class="cursor-pointer"
+						:class="{ 'text-yellow-100 font-bold': isCurLyric(lyricsIndices[i]) }"
+						:id="lyricsIndices[i]"
+						:key="i"
+						@click="handleLineClick(lyricsIndices[i])"
+					>
+						<div v-if="furiganaLine === null">♪</div>
+						<div class="flex items-baseline" v-html="furiganaLine"></div>
+					</div>
+				</div>
+				<div v-else class="flex flex-col text-[#F5F5F5bb] text-2xl gap-3 p-4">
+					<p
+						v-for="(lyric_line, i) in lyrics"
+						class="cursor-pointer"
+						:class="{ 'text-yellow-100 font-bold': isCurLyric(lyricsIndices[i]) }"
+						:id="lyricsIndices[i]"
+						:key="i"
+						@click="handleLineClick(lyricsIndices[i])"
+					>
+						{{ lyric_line === "" ? "♪" : lyric_line }}
+					</p>
+				</div>
 			</div>
 			<div v-else>
 				<div class="flex items-center gap-3">
@@ -61,10 +76,11 @@
 <script setup lang="ts">
 const route = useRoute()
 const lyricId = route.params.lyricId
-
 import removeMd from 'remove-markdown'
 
+const furigana = ref(true)
 const lyrics = ref([])
+const furiganalyzedLyrics = ref([])
 const lyricsIndices = ref([])
 const externalId = ref("")
 const timestamps = ref([]) // in pairs format [start, end]
@@ -128,6 +144,18 @@ const regenerateBreakdowns = async () => {
 	reloadNuxtApp()
 }
 
+const getFurigana = async (text: string) => {
+	const response = await fetch("/api/getFurigana", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({ text: text })
+	})
+	const data = await response.text()
+	return data
+}
+
 const fetchMusicData = async () => {
 	const lyricsResponse = await fetch(`https://lrclib.net/api/get/${lyricId}`)
 	if (!lyricsResponse.ok) {
@@ -148,14 +176,25 @@ const fetchMusicData = async () => {
 	const l = rawLyrics.length
 	let indices = new Array<number>
 	let j = 0
-	for (let i = 0; i < l; i++){
-		if (rawLyrics[i] !== ""){
+	const furiganaPromises = rawLyrics.map((lyric: string, i: number) => {
+		if (lyric !== "") {
 			indices.push(j)
 			j++
+			return getFurigana(lyric)
 		} else {
 			indices.push(-1)
+			return Promise.resolve(null)
 		}
+	})
+
+	try {
+		// Wait for all promises to resolve
+		const furiganaResults = await Promise.all(furiganaPromises)
+		furiganalyzedLyrics.value = furiganaResults
+	} catch (error) {
+		console.error("Error fetching furigana:", error)
 	}
+
 	lyrics.value = rawLyrics
 	lyricsIndices.value = indices
 	fetchedLyrics.value = true

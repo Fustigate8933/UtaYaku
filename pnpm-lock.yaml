@@ -29,6 +29,12 @@ importers:
       install:
         specifier: ^0.13.0
         version: 0.13.0
+      kuroshiro:
+        specifier: ~1.1.2
+        version: 1.1.2
+      kuroshiro-analyzer-kuromoji:
+        specifier: ^1.1.0
+        version: 1.1.0
       nuxt:
         specifier: ^3.14.159
         version: 3.14.1592(@parcel/watcher@2.5.0)(@types/node@22.10.5)(better-sqlite3@11.7.0)(ioredis@5.4.1)(magicast@0.3.5)(rollup@4.27.3)(terser@5.36.0)(typescript@5.6.3)(vite@5.4.11(@types/node@22.10.5)(terser@5.36.0))
@@ -1316,6 +1322,9 @@ packages:
   b4a@1.6.7:
     resolution: {integrity: sha512-OnAYlL5b7LEkALw87fUVafQw5rVR9RjwGd4KUwNQ6DrrNmaVaUCgLipfVlzrPQ4tWOR9P0IXGNOx50jYCCdSJg==}
 
+  babel-runtime@6.26.0:
+    resolution: {integrity: sha512-ITKNuq2wKlW1fJg9sSW52eepoYgZBggvOAHC0u/CYu/qxQ9EVzThCgR69BnSXLHjy2f7SY5zaQ4yt7H9ZVxY2g==}
+
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
@@ -1830,6 +1839,9 @@ packages:
   dotenv@16.4.5:
     resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
     engines: {node: '>=12'}
+
+  doublearray@0.0.2:
+    resolution: {integrity: sha512-aw55FtZzT6AmiamEj2kvmR6BuFqvYgKZUkfQ7teqVRNqD5UE0rw8IeW/3gieHNKQ5sPuDKlljWEn4bzv5+1bHw==}
 
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
@@ -2446,6 +2458,16 @@ packages:
 
   kolorist@1.8.0:
     resolution: {integrity: sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ==}
+
+  kuromoji@0.1.2:
+    resolution: {integrity: sha512-V0dUf+C2LpcPEXhoHLMAop/bOht16Dyr+mDiIE39yX3vqau7p80De/koFqpiTcL1zzdZlc3xuHZ8u5gjYRfFaQ==}
+
+  kuroshiro-analyzer-kuromoji@1.1.0:
+    resolution: {integrity: sha512-BSJFhpsQdPwfFLfjKxfLA9iL+/PC6LCR9vgwgb5Jc7jZwk9ilX8SAV6CwhAQZY611tiuhbB52ONYKDO8hgY1bA==}
+
+  kuroshiro@1.1.2:
+    resolution: {integrity: sha512-kM8OjYancYcr6awdfZum02tKR+p6+MheW+DojRHg71QunMdLPaXqY8sMP/FLsInioEiGs1T13zNyxjOG65K0KQ==}
+    engines: {node: '>=6.5.0'}
 
   launch-editor@2.9.1:
     resolution: {integrity: sha512-Gcnl4Bd+hRO9P9icCP/RVVT2o8SFlPXofuCxvA2SaZuH45whSvf5p8x5oih5ftLiVhEI4sp5xDY+R+b3zJBh5w==}
@@ -3258,6 +3280,9 @@ packages:
     resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
+  regenerator-runtime@0.11.1:
+    resolution: {integrity: sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg==}
+
   regenerator-runtime@0.13.11:
     resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
 
@@ -4054,6 +4079,9 @@ packages:
   zip-stream@6.0.1:
     resolution: {integrity: sha512-zK7YHHz4ZXpW89AHXUPbQVGKI7uvkd3hzusTdotCg1UxyaVtg0zFJSTfW/Dq5f7OBBVnq6cZIaC8Ti4hb6dtCA==}
     engines: {node: '>= 14'}
+
+  zlibjs@0.3.1:
+    resolution: {integrity: sha512-+J9RrgTKOmlxFSDHo0pI1xM6BLVUv+o0ZT9ANtCxGkjIVCCUdx9alUF8Gm+dGLKbkkkidWIHFDZHDMpfITt4+w==}
 
 snapshots:
 
@@ -5645,6 +5673,11 @@ snapshots:
 
   b4a@1.6.7: {}
 
+  babel-runtime@6.26.0:
+    dependencies:
+      core-js: 2.6.12
+      regenerator-runtime: 0.11.1
+
   balanced-match@1.0.2: {}
 
   bare-events@2.5.0:
@@ -6133,6 +6166,8 @@ snapshots:
       type-fest: 4.27.0
 
   dotenv@16.4.5: {}
+
+  doublearray@0.0.2: {}
 
   duplexer@0.1.2: {}
 
@@ -6861,6 +6896,20 @@ snapshots:
       - supports-color
 
   kolorist@1.8.0: {}
+
+  kuromoji@0.1.2:
+    dependencies:
+      async: 2.6.4
+      doublearray: 0.0.2
+      zlibjs: 0.3.1
+
+  kuroshiro-analyzer-kuromoji@1.1.0:
+    dependencies:
+      kuromoji: 0.1.2
+
+  kuroshiro@1.1.2:
+    dependencies:
+      babel-runtime: 6.26.0
 
   launch-editor@2.9.1:
     dependencies:
@@ -7821,6 +7870,8 @@ snapshots:
     dependencies:
       redis-errors: 1.2.0
 
+  regenerator-runtime@0.11.1: {}
+
   regenerator-runtime@0.13.11: {}
 
   regexp-tree@0.1.27: {}
@@ -8668,3 +8719,5 @@ snapshots:
       archiver-utils: 5.0.2
       compress-commons: 6.0.2
       readable-stream: 4.5.2
+
+  zlibjs@0.3.1: {}
