@@ -10,12 +10,12 @@
 					<div class="flex flex-col gap-1">
 						<input v-model="huggingchatPassword" class="rounded-lg px-2 py-1 text-black" type="password" placeholder="Password" />
 					</div>
-					<button class="h-full rounded-lg hover:cursor-pointer border-2 border-gray-400 hover:border-white active:border-gray-400 px-2 py-1" @click="saveCredentials">Save</button>
+					<button class="h-full rounded-lg hover:cursor-pointer border-2 border-gray-400 hover:border-white active:border-gray-400 px-2 py-1" @click="saveCredentials">{{ saved ? 'Saved' : 'Save' }}</button>
 				</div>
-				<div class="ml-3 text-sm">
-					<p>* Please provide your credentials from <span class="text-blue-300 underline"><a href="https://huggingface.co/chat/" target="_blank">HuggingChat</a></span> as lyric analysis requires it (free).</p>
-					<p>* It's best to use a throwaway account for concerns of privacy and chat modification.</p>
-				</div>
+				<ul class="ml-3 text-sm text-gray-400">
+					<li>* Please provide your credentials from <span class="text-blue-300 underline"><a href="https://huggingface.co/chat/" target="_blank">HuggingChat</a></span>(free) as lyric analysis requires it.</li>
+					<li>* It's best to use a throwaway account for concerns of privacy and chat modification.</li>
+				</ul>
 			</div>
 			<div class="w-full flex gap-10 text-center justify-center text-lg">
 				<div class="flex flex-col gap-1">
@@ -71,6 +71,7 @@ const fetchingMetaData = ref(false)
 const noTracksFound = ref(false)
 const huggingchatEmail = ref("")
 const huggingchatPassword = ref("")
+const saved = ref(false)
 
 const getMetaData = async () => {
 	trackCandidates.value = []
@@ -92,7 +93,21 @@ const saveCredentials = () => {
 	if (process.client) {
 		localStorage.setItem("hugEmail", huggingchatEmail.value)
 		localStorage.setItem("hugSecret", huggingchatPassword.value)
+		saved.value = true
 	}
 }
+
+onMounted(() => {
+	if (process.client) {
+		const email = localStorage.getItem("hugEmail")
+		const password = localStorage.getItem("hugSecret")
+		if (email !== null) {
+			huggingchatEmail.value = email
+		}
+		if (password !== null) {
+			huggingchatPassword.value = password
+		}
+	}
+})
 </script>
 

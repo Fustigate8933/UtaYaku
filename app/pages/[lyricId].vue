@@ -29,7 +29,12 @@
 					</h1>
 				</div>
 			</div>
-			<div v-if="fetchedLyrics" class="overflow-y-auto w-full">
+			<div v-if="fetchedLyrics" class="overflow-y-auto w-full relative">
+				<label class="absolute inline-flex items-center cursor-pointer top-2 right-4">
+					<!-- <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Furigana</span> -->
+					<input type="checkbox" value="" class="sr-only peer" :checked="furigana" @click="() => {furigana = !furigana}">
+					<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+				</label>
 				<div v-if="furigana" class="flex flex-col text-[#F5F5F5bb] text-2xl gap-3 p-4">
 					<div
 						v-for="(furiganaLine, i) in furiganalyzedLyrics"
