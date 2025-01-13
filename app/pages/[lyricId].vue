@@ -109,7 +109,7 @@ const { getBreakDown } = useBreakDown()
 const song_name = ref("Fetching song name")
 const artist_name = ref("Fetching artist name")
 
-const offset = ref(1)
+const offset = ref(0)
 
 function timestampToMS(timestamp: string){
 	const [minutes, seconds, milliseconds] = timestamp.slice(1, -1).split(/[:.]/).map(Number)
