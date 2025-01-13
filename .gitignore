@@ -6,3 +6,4 @@ cookies
 backend/.env
 backend/cookies
 backend/__pycache__
+.output
