@@ -3,7 +3,7 @@ Learn Japanese with music. Just like Spotify and other music services, read the 
 
 I hope to support **playlist importing** from music services like Spotify and Youtube Music. I also plan on turning it into an app since most people use their phones for music.
 
-The lyric breakdown works through AI api calls. The master branch uses OpenAI, which requires you to configure your own key, and the hugchat branch uses a free api from huggingface. Note: the latter is significantly slower.
+The lyric breakdown works through OpenAI api calls, which is significantly faster, but costs money. The master branch uses HuggingChat, a free but slower backend.
 
 This is a preview of the current state:
 
