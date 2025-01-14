@@ -1,6 +1,9 @@
 <template>
 	<div class="flex items-center flex-col justify-center h-full w-full gap-5">
-		<div class="max-w-4xl flex items-center flex-col justify-center h-full w-full gap-5 py-[4rem]">
+		<div class="max-w-4xl flex items-center flex-col h-full w-full gap-5 py-[4rem]">
+			<NuxtLink to="/" class="self-start border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-lg text-gray-400 hover:text-white active:text-gray-500">
+				Home
+			</NuxtLink>
 			<div class="flex gap-3 items-baseline border-white border-b"> <h1 class="text-5xl text-yellow-100">{{song_name}}</h1>
 				<h1 class="text-xl text-orange-200">({{artist_name}})</h1>
 			</div>
