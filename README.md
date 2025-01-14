@@ -10,16 +10,10 @@ This is a preview of the current state:
 https://github.com/user-attachments/assets/3ff5f303-2407-41ce-b273-667401342ed4
 
 
-
-
-
-
-
-
 #### Installation
 1. Clone the repository and cd into it
 2. Run `pnpm install` or `npm install` or the equivalent whatever package manager you prefer.
 3. Create a .env file in the root directory with `CLIENT_ID=<your client id from app.musicapi.com>`, which can be found at [apiAccess](https://app.musicapi.com/admin/account/apiAccess).
-4. add `OPENAI_API_KEY=<your openai key that supports gpt4-o` as an environment variable
+4. Register for an account on HuggingChat.
 5. pnpm run dev
 6. access the website on http://localhost:3000/
