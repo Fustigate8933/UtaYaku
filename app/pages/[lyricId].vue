@@ -165,6 +165,41 @@ const getFurigana = async (text: string) => {
 }
 
 const fetchMusicData = async () => {
+	// fetch track metadata from musicapi
+	const embeddingResponse = await fetch("/api/musicapi", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ song_name: song_name.value, artist_name: artist_name.value })
+	})
+	const embeddingResponseData = await embeddingResponse.json()
+	const trackUrl = embeddingResponseData.url
+	externalId.value = embeddingResponseData.externalId
+	
+	// check if the track has already been processed before
+	const breakdownExistsResult = await fetch("/api/needBreakdown", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ musicId: externalId.value })
+	})
+	const breakdownExistsData = await breakdownExistsResult.json()
+	const breakdownExists = breakdownExistsData.result
+
+	if (breakdownExists) {
+		const fetchedBreakdownResult = await fetch("/api/getBreakdown", {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ musicId: embeddingResponseData.externalId })
+		})
+		const fetchedBreakdownData = await fetchedBreakdownResult.json()
+		
+	}
+
 	const lyricsResponse = await fetch(`https://lrclib.net/api/get/${lyricId}`)
 	if (!lyricsResponse.ok) {
 		throw new Error(`No song with id ${lyricId} could be found.`)
@@ -207,17 +242,6 @@ const fetchMusicData = async () => {
 	lyricsIndices.value = indices
 	fetchedLyrics.value = true
 
-	const embeddingResponse = await fetch("/api/musicapi", {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ song_name: song_name.value, artist_name: artist_name.value })
-	})
-	const embeddingResponseData = await embeddingResponse.json()
-	const trackUrl = embeddingResponseData.url
-	externalId.value = embeddingResponseData.externalId
-
 	try {
 		initializeSpotifyEmbed(trackUrl)
 	} catch (error) {
@@ -229,16 +253,6 @@ const fetchMusicData = async () => {
 	}
 
 	try {
-		const breakdownExistsResult = await fetch("/api/needBreakdown", {
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ musicId: externalId.value })
-		})
-		const breakdownExistsData = await breakdownExistsResult.json()
-		const breakdownExists = breakdownExistsData.result
-		
 		let email = ""
 		let password = ""
 		if (process.client) {
@@ -347,7 +361,7 @@ const fetchMusicData = async () => {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ allBreakdowns: allBreakdowns.value, musicId: embeddingResponseData.externalId })
+					body: JSON.stringify({ allBreakdowns: allBreakdowns.value, musicId: embeddingResponseData.externalId, lyrics: rawLyrics, furigana: furiganalyzedLyrics.value.join("\n") })
 				})
 				const addBreakdownResultData = await addBreakdownResult.json()
 				console.log(addBreakdownResultData.message)
