@@ -1,15 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-	nitro:{
-		experimental: {
-			database: true	
-		},
-		database: {
-			breakdowns: { // database name
-				connector: "sqlite",
-				options: { name: "breakdowns" } // name of the database file
-			},
-		}
+	supabase: {
+		redirect: false
 	},
 
 	compatibilityDate: '2024-04-03',
@@ -19,7 +11,13 @@ export default defineNuxtConfig({
 		compatibilityVersion: 4
 	},
 
-	modules: ["@nuxtjs/tailwindcss", "@nuxt/fonts", "@nuxt/icon", "@nuxt/image"],
+	modules: [
+		"@nuxtjs/tailwindcss",
+		"@nuxt/fonts",
+		"@nuxt/icon",
+		"@nuxt/image",
+		"@nuxtjs/supabase"
+	],
 
 	css: ["./assets/css/tailwind.css"],
 

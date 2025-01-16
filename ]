@@ -139,7 +139,7 @@ const filterTimestamps = (rawSynced: Array<string>) => {
 }
 
 const regenerateBreakdowns = async () => {
-	const deleteBreakdownResult = await fetch("/api/db/deleteBreakdown", {
+	const deleteBreakdownResult = await fetch("/api/deleteBreakdown", {
 		method: "POST",
 		headers: {
 			'Content-Type': 'application/json',
@@ -165,17 +165,6 @@ const getFurigana = async (text: string) => {
 }
 
 const fetchMusicData = async () => {
-	const lyricsResponse = await fetch(`https://lrclib.net/api/get/${lyricId}`)
-	if (!lyricsResponse.ok) {
-		throw new Error(`No song with id ${lyricId} could be found.`)
-	}
-	const lyricsData = await lyricsResponse.json()
-	if (lyricsData.length === 0) {
-		throw new Error(`No song with id ${lyricId} could be found.`)
-	}
-	song_name.value = lyricsData.trackName
-	artist_name.value = lyricsData.artistName
-
 	// get song metadata
 	const embeddingResponse = await fetch("/api/musicapi", {
 		method: "POST",
@@ -189,7 +178,7 @@ const fetchMusicData = async () => {
 	externalId.value = embeddingResponseData.externalId
 	
 	// check if song has already been process before
-	const breakdownExistsResult = await fetch("/api/db/needBreakdown", {
+	const breakdownExistsResult = await fetch("/api/needBreakdown", {
 		method: "POST",
 		headers: {
 			'Content-Type': 'application/json',
@@ -201,19 +190,19 @@ const fetchMusicData = async () => {
 
 	if (breakdownExists) {
 		console.log("Breakdowns already exists, fetching from database...")
-		const fetchedBreakdownResult = await fetch("/api/db/getBreakdown", {
+		const fetchedBreakdownResult = await fetch("/api/getBreakdown", {
 			method: "POST",
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({ musicId: embeddingResponseData.externalId })
 		})
-		const fetchedBreakdownData = (await fetchedBreakdownResult.json()).data
-		console.log(fetchedBreakdownData)
-		allBreakdowns.value = fetchedBreakdownData.allBreakdowns.map((breakdown) => JSON.parse(breakdown))
+		const fetchedBreakdownData = await fetchedBreakdownResult.json()
+	
+		allBreakdowns.value = fetchedBreakdownData.breakdowns
 		lyrics.value = fetchedBreakdownData.lyrics
-		lyricsIndices.value = fetchedBreakdownData.indices.map(Number)
-		timestamps.value = fetchedBreakdownData.timestamps.map((row) => row.map(Number))
+		lyricsIndices.value = fetchedBreakdownData.indices
+		timestamps.value = fetchedBreakdownData.timestamps
 		furiganalyzedLyrics.value = fetchedBreakdownData.furigana
 		song_name.value = fetchedBreakdownData.name
 		artist_name.value = fetchedBreakdownData.artist
@@ -235,25 +224,26 @@ const fetchMusicData = async () => {
 
 		return
 	}
-	
-	// song hasn't been processed before
+
+	const lyricsResponse = await fetch(`https://lrclib.net/api/get/${lyricId}`)
+	if (!lyricsResponse.ok) {
+		throw new Error(`No song with id ${lyricId} could be found.`)
+	}
+
+	const lyricsData = await lyricsResponse.json()
+	if (lyricsData.length === 0) {
+		throw new Error(`No song with id ${lyricId} could be found.`)
+	}
+
+	song_name.value = lyricsData.trackName
+	artist_name.value = lyricsData.artistName
+
 	const rawLyrics = lyricsData.plainLyrics.split("\n")
 	const rawSynced = lyricsData.syncedLyrics.split("\n").slice(0, -1)
 	timestamps.value = filterTimestamps(rawSynced)
 	const l = rawLyrics.length
 	let indices = new Array<number>
 	let j = 0
-
-	try {
-		initializeSpotifyEmbed(trackUrl)
-	} catch (error) {
-		if (error instanceof Error) {
-			console.error(error.message)
-		} else{
-			console.error("error during spotify embed initialization: ", error)
-		}
-	}
-
 	const furiganaPromises = rawLyrics.map((lyric: string, i: number) => {
 		if (lyric !== "") {
 			indices.push(j)
@@ -275,6 +265,16 @@ const fetchMusicData = async () => {
 	lyrics.value = rawLyrics
 	lyricsIndices.value = indices
 	fetchedLyrics.value = true
+
+	try {
+		initializeSpotifyEmbed(trackUrl)
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error(error.message)
+		} else{
+			console.error("error during spotify embed initialization: ", error)
+		}
+	}
 
 	try {
 		let email = ""
@@ -368,21 +368,12 @@ const fetchMusicData = async () => {
 
 			// store breakdowns in to the database 
 			if (success){
-				const addBreakdownResult = await fetch("/api/db/addBreakdown", {
+				const addBreakdownResult = await fetch("/api/addBreakdown", {
 					method: "POST",
 					headers: {
 						'Content-Type': 'application/json',
-					}, // allBreakdowns, lyrics, furigana, indices, timestamps, name, artist
-					body: JSON.stringify({ 
-						allBreakdowns: allBreakdowns.value.map((breakdown) => JSON.stringify(breakdown)),
-						musicId: embeddingResponseData.externalId,
-						lyrics: lyrics.value, 
-						furigana: furiganalyzedLyrics.value, 
-						indices: lyricsIndices.value, 
-						timestamps: timestamps.value, 
-						name: song_name.value, 
-						artist: artist_name.value 
-					})
+					},
+					body: JSON.stringify({ allBreakdowns: allBreakdowns.value, musicId: embeddingResponseData.externalId })
 				})
 				const addBreakdownResultData = await addBreakdownResult.json()
 				console.log(addBreakdownResultData.message)
