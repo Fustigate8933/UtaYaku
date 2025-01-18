@@ -1,7 +1,7 @@
-import { serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseServiceRole } from '#supabase/server'
 
 export default defineEventHandler(async (event) => {
-	const client = await serverSupabaseClient(event)
+	const client = serverSupabaseServiceRole(event)
 
 	const { musicId, allBreakdowns, lyrics, furigana, indices, timestamps, name, artist } = await readBody(event)
 		

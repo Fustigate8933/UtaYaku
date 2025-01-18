@@ -14,7 +14,7 @@
 						<h1 class="text-white">{{progress}}%</h1>
 					</div>
 					<div class="w-full rounded-full h-2 bg-gray-700">
-						<div class="bg-gray-300 h-2 rounded-full" :style="{'width': `${progress}%`}"></div>
+						<div class="animate-pulse bg-gray-300 h-2 rounded-full" :style="{'width': `${progress}%`}"></div>
 					</div>
 				</div>
 				<div v-else>
