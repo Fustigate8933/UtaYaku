@@ -11,12 +11,12 @@
 <script setup>
 
 onMounted(async () => {
-	const response = await fetch("/api/db/addBreakdown", {
+	const response = await fetch("/api/db/getBreakdown", {
 		method: "POST",
 		headers: {
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify({ musicId: "abc", allBreakdowns: [{"hello": "hello"}, {"goodbye": "goodbye"}], lyrics: ["abc", "def"], furigana: ["hi", "bye"], indices: [0, 1 ,2], timestamps: [[0, 1], [2, 3]], name: "piggy", artist: "piggy dad" })
+		body: JSON.stringify({ musicId: "6EzZn96uOc9JsVGNRpx06n" })
 	})
 	const data = await response.text()
 	console.log(data)
