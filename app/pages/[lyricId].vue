@@ -1,6 +1,6 @@
 <template>
 	<div class="flex items-center flex-col justify-center h-full w-full gap-5">
-		<div class="max-w-4xl flex items-center flex-col h-full w-full gap-5 py-[4rem]">
+		<div class="max-w-4xl flex items-center flex-col h-full w-full gap-4 py-[3rem]">
 			<NuxtLink to="/" class="self-start border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-lg text-gray-400 hover:text-white active:text-gray-500">
 				Home
 			</NuxtLink>
@@ -108,6 +108,7 @@ const fetchedBreakdowns = ref(false)
 const embedReady = ref(false)
 
 const { getBreakDown } = useBreakDown()
+const { getOpenAIBreakDown } = useOpenAIBreakDown()
 
 const song_name = ref("Fetching song name")
 const artist_name = ref("Fetching artist name")
@@ -317,7 +318,8 @@ const fetchMusicData = async () => {
 						}
 
 						console.log(`Processing batch ${batchCount.value}`)
-						const result = await getBreakDown(buffer, email, password)
+						// const result = await getBreakDown(buffer, email, password)
+						let result = removeMd((await getOpenAIBreakDown(buffer)).content.replace(/\n\s+/g, "")).replace("`", "")
 						if (result === "wrong username or password"){
 							breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
 							phrases.value = ["Special message"]
@@ -347,7 +349,8 @@ const fetchMusicData = async () => {
 				}
 
 				console.log(`Processing batch ${batchCount.value}`)
-				const result = await getBreakDown(buffer, email, password)
+				// const result = await getBreakDown(buffer, email, password)
+				let result = removeMd((await getOpenAIBreakDown(buffer)).content.replace(/\n\s+/g, "")).replace("`", "")
 
 				if (result === "wrong username or password"){
 					breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
