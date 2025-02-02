@@ -20,9 +20,10 @@ def generate_breakdown(request: GenRequest):
         sign = Login(request.email, request.password)
         cookies = sign.login(cookie_dir_path=cookie_path_dir, save_cookies=True)
         chatbot = hugchat.ChatBot(cookies=cookies.get_dict())
+        llm = 3
+        chatbot.switch_llm(llm)
         chatbot.new_conversation(switch_to=True, system_prompt=system_prompt)
-
-        print("Generating breakdown...")
+        print(f"Generating breakdown via {chatbot.get_available_llm_models()[llm].__dict__["name"]}")
 
         message = chatbot.chat(request.query).wait_until_done()
         return JSONResponse(status_code=200, content={"breakdown": message})
