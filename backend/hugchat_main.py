@@ -6,6 +6,7 @@ from hugchat import hugchat
 from hugchat.login import Login
 import docker
 import json
+import re
 
 app = FastAPI()
 
@@ -19,24 +20,92 @@ pg.start()
 main = client.containers.get("ichiran-main-1")
 main.start()
 
+def clean_input(text):
+    return re.sub(r"[^\w\sぁ-んァ-ン一-龥]", "", text)
+
+def get_breakdown(text):
+    exit_code, output = main.exec_run(f'ichiran-cli -f "{clean_input(text)}"')
+    breakdowns = []
+
+    if exit_code != 0:
+        return exit_code, breakdowns
+
+    output = output.decode("utf-8")
+    output = "\n".join(line for line in output.splitlines() if not re.search(r"WARNING", line))
+    output = json.loads(output)[0][0][0]
+
+    for breakdown in output:
+        word_data = breakdown[1]  # Get word info
+        entry = {}
+        components = []
+
+        if "components" in word_data:
+            components.extend(word_data["components"])
+
+        if "alternative" in word_data:
+            components.extend(word_data["alternative"])
+
+        main_text = word_data.get("text")
+        if not main_text and components:
+            main_text = components[0].get("text", "UNKNOWN")  # Use first child's text
+
+        if components:
+            component_entries = []
+
+            for component in components:
+                word_entry = {component["text"]: []}
+
+                if "gloss" in component:
+                    for definition in component["gloss"]:
+                        word_entry[component["text"]].append(definition["gloss"])
+
+                elif "conj" in component and component["conj"]:
+                    for conj in component["conj"]:
+                        for gloss in conj.get("gloss", []):
+                            word_entry[component["text"]].append(gloss["gloss"])
+
+                elif "suffix" in component:
+                    word_entry[component["text"]].append(component["suffix"])
+
+                component_entries.append(word_entry)
+
+            entry[f"{main_text}"] = component_entries
+
+        else:
+            word_entry = {main_text: []}
+
+            if "gloss" in word_data:
+                for definition in word_data["gloss"]:
+                    word_entry[main_text].append(definition["gloss"])
+
+            elif "conj" in word_data and word_data["conj"]:
+                for conj in word_data["conj"]:
+                    for gloss in conj.get("gloss", []):
+                        word_entry[main_text].append(gloss["gloss"])
+
+            entry[f"{main_text}"] = [word_entry]
+
+        breakdowns.append(entry)
+
+    return exit_code, breakdowns
+
+
 class GenRequest(BaseModel):
     query: str
     email: str
     password: str
+    breakdown_type: str
 
 @app.post("/")
 def generate_breakdown(request: GenRequest):
+    print(f"Generating breakdown for {request.query} {request.breakdown_type}")
     if request.breakdown_type == "ichiran":
-        exit_code, output = main.exec_run(f'ichiran-cli -f "{request.query}"')
-        try:
-            assert(exit_code == 0)
-            output = json.loads(output.decode())[0][0][0]
-            breakdowns = [[breakdown[1]["reading"], breakdown[1]["gloss"]] for breakdown in output]
-            print(breakdowns)
+        exit_code, breakdowns = get_breakdown(request.query)
+        if exit_code == 0:
             return JSONResponse(status_code=200, content={"breakdown": breakdowns})
-        except:
-            print(output)
-            return JSONResponse(status_code=500, content={"breakdown": "Ichiran generation failed"})
+        else:
+            print(f"Exit code: {exit_code}, exit code != 0")
+            return JSONResponse(status_code=500, content={"breakdown": str(e)})
     else:
         try:
             sign = Login(request.email, request.password)

@@ -6,7 +6,6 @@ export default defineEventHandler(async (event) => {
 	const kuroshiro = new Kuroshiro()
 	await kuroshiro.init(new KuromojiAnalyzer())
 	const result = await kuroshiro.convert(text, {to: "hiragana", mode: "furigana"})
-	console.log("furigana success")
 	
 	return result
 })

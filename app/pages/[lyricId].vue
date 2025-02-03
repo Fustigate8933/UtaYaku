@@ -18,18 +18,41 @@
 					</div>
 				</div>
 				<div v-else>
-					<button 
-						class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
-						@click="regenerateBreakdowns"
-					>
-						Regenerate
-					</button>
-					<h1 v-for="(key, i) in phrases" :key="i">
-						<span class="text-[#bfe3b4]">{{ key }}</span>: {{ breakdown[key] }}
-					</h1>
-					<h1>
-						<span class="text-orange-200">Translation</span>: {{ translation }}
-					</h1>
+					<div v-if="useAi">
+						<button 
+							class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
+							@click="regenerateBreakdowns"
+						>
+							Regenerate
+						</button>
+						<h1 v-for="(key, i) in phrases" :key="i">
+							<span class="text-[#bfe3b4]">{{ key }}</span>: {{ breakdown[key] }}
+						</h1>
+						<h1>
+							<span class="text-orange-200">Translation</span>: {{ translation }}
+						</h1>
+					</div>
+					<div v-else>
+						<div v-for="(key, i) in phrases" :key="i">
+							<div v-for="(key2, j) in breakdown[i]" :key="j">
+								<h1 class="text-[#bfe3b4]">{{ j }}</h1>
+								<div v-for="(key3, k) in breakdown[i][j]" :key="k">
+									<ul>
+										<li v-for="(key4, l) in key3" :key="l">
+											<h1 class="pl-3">* {{ l }}</h1>
+											<ul>
+												<li v-for="(key5, m) in key4" :key="m">
+													<h1 class="pl-6">
+														- {{ key5 }}
+													</h1>
+												</li>
+											</ul>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<div v-if="fetchedLyrics" class="overflow-y-auto w-full relative">
@@ -75,7 +98,7 @@
 			</div>
 			<div class="flex items-center gap-3" :class="embedReady ? 'hidden' : ''">
 				<Shuriken size="25px" />
-				<h1 class="text-white">Fetching lyrics</h1>
+				<h1 class="text-white">Fetching embedded player</h1>
 			</div>
 		</div>
 	</div>
@@ -102,6 +125,8 @@ const generatingBreakdowns = ref(false)
 const batchesNeeded = ref(0)
 const batchCount = ref(0)
 const progress = ref(0)
+
+const useAi = ref(false)
 
 const fetchedLyrics = ref(false)
 const fetchedBreakdowns = ref(false)
@@ -165,118 +190,7 @@ const getFurigana = async (text: string) => {
 	return data
 }
 
-const fetchMusicData = async () => {
-	const lyricsResponse = await fetch(`https://lrclib.net/api/get/${lyricId}`)
-	if (!lyricsResponse.ok) {
-		throw new Error(`No song with id ${lyricId} could be found.`)
-	}
-	const lyricsData = await lyricsResponse.json()
-	if (lyricsData.length === 0) {
-		throw new Error(`No song with id ${lyricId} could be found.`)
-	}
-	song_name.value = lyricsData.trackName
-	artist_name.value = lyricsData.artistName
-
-	// get song metadata
-	const embeddingResponse = await fetch("/api/musicapi", {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ song_name: song_name.value, artist_name: artist_name.value })
-	})
-	const embeddingResponseData = await embeddingResponse.json()
-	const trackUrl = embeddingResponseData.url
-	externalId.value = embeddingResponseData.externalId
-	
-	// check if song has already been process before
-	const breakdownExistsResult = await fetch("/api/db/needBreakdown", {
-		method: "POST",
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ musicId: externalId.value })
-	})
-	const breakdownExistsData = await breakdownExistsResult.json()
-	const breakdownExists = breakdownExistsData.result
-
-	if (breakdownExists) {
-		console.log("Breakdowns already exists, fetching from database...")
-		const fetchedBreakdownResult = await fetch("/api/db/getBreakdown", {
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ musicId: embeddingResponseData.externalId })
-		})
-		const fetchedBreakdownData = (await fetchedBreakdownResult.json()).data
-		console.log(fetchedBreakdownData)
-		allBreakdowns.value = fetchedBreakdownData.allBreakdowns.map((breakdown) => JSON.parse(breakdown))
-		lyrics.value = fetchedBreakdownData.lyrics
-		lyricsIndices.value = fetchedBreakdownData.indices.map(Number)
-		timestamps.value = fetchedBreakdownData.timestamps.map((row) => row.map(Number))
-		furiganalyzedLyrics.value = fetchedBreakdownData.furigana
-		song_name.value = fetchedBreakdownData.name
-		artist_name.value = fetchedBreakdownData.artist
-
-		fetchedLyrics.value = true
-		fetchedBreakdowns.value = true
-
-		try {
-			initializeSpotifyEmbed(trackUrl)
-		} catch (error) {
-			if (error instanceof Error) {
-				console.error(error.message)
-			} else{
-				console.error("error during spotify embed initialization: ", error)
-			}
-		}
-
-		embedReady.value = true
-
-		return
-	}
-	
-	// song hasn't been processed before
-	const rawLyrics = lyricsData.plainLyrics.split("\n")
-	const rawSynced = lyricsData.syncedLyrics.split("\n").slice(0, -1)
-	timestamps.value = filterTimestamps(rawSynced)
-	const l = rawLyrics.length
-	let indices = new Array<number>
-	let j = 0
-
-	try {
-		initializeSpotifyEmbed(trackUrl)
-	} catch (error) {
-		if (error instanceof Error) {
-			console.error(error.message)
-		} else{
-			console.error("error during spotify embed initialization: ", error)
-		}
-	}
-
-	const furiganaPromises = rawLyrics.map((lyric: string, i: number) => {
-		if (lyric !== "") {
-			indices.push(j)
-			j++
-			return getFurigana(lyric)
-		} else {
-			indices.push(-1)
-			return Promise.resolve(null)
-		}
-	})
-
-	try {
-		const furiganaResults = await Promise.all(furiganaPromises)
-		furiganalyzedLyrics.value = furiganaResults
-	} catch (error) {
-		console.error("Error fetching furigana:", error)
-	}
-
-	lyrics.value = rawLyrics
-	lyricsIndices.value = indices
-	fetchedLyrics.value = true
-
+const aiFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) => {
 	try {
 		let email = ""
 		let password = ""
@@ -300,7 +214,7 @@ const fetchMusicData = async () => {
 			breakdown.value = {"Special message": "This song is new in the system, generating breakdown."}
 			phrases.value = ["Special message"]
 			translation.value = "New song detected, generating breakdown."
-			
+
 			generatingBreakdowns.value = true
 
 			const batchSize = 7
@@ -318,7 +232,7 @@ const fetchMusicData = async () => {
 						}
 
 						console.log(`Processing batch ${batchCount.value}`)
-						// const result = await getBreakDown(buffer, email, password)
+						// const result = await getBreakDown(buffer, email, password, "huggingchat")
 						let result = removeMd((await getOpenAIBreakDown(buffer)).content.replace(/\n\s+/g, "")).replace("`", "")
 						if (result === "wrong username or password"){
 							breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
@@ -349,7 +263,7 @@ const fetchMusicData = async () => {
 				}
 
 				console.log(`Processing batch ${batchCount.value}`)
-				// const result = await getBreakDown(buffer, email, password)
+				// const result = await getBreakDown(buffer, email, password, "huggingchat")
 				let result = removeMd((await getOpenAIBreakDown(buffer)).content.replace(/\n\s+/g, "")).replace("`", "")
 
 				if (result === "wrong username or password"){
@@ -403,6 +317,187 @@ const fetchMusicData = async () => {
 		phrases.value = ["Special message"]
 		translation.value = "Generation failure."
 		generatingBreakdowns.value = false
+	}
+}
+
+const ichiranFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) => {
+	console.log("Fetching with ichiran")
+
+	breakdown.value = {"Special message": "This song is new in the system, generating breakdown."}
+	phrases.value = ["Special message"]
+	translation.value = "New song detected, generating breakdown."
+
+	generatingBreakdowns.value = true
+
+	let success = true // no errors during breakdown fetch
+	for (let i = 0; i < l; i++){
+		if (rawLyrics[i] !== "" && rawLyrics[i] !== "♪"){
+			const result = await getBreakDown(rawLyrics[i], "", "", "ichiran")
+			breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
+			phrases.value = ["Special message"]
+			translation.value = "Your HuggingChat credentials were incorrect."
+
+			// comment this after all testing
+			// success = false
+			
+			const content = JSON.parse(result!)
+			console.log(rawLyrics[i], content)
+			
+			allBreakdowns.value.push(content)
+
+			progress.value = Math.floor((i + 1) / l * 100)
+			console.log("progress: ", progress.value)
+		} else {
+			allBreakdowns.value.push(null)
+		}
+	}
+	console.log(allBreakdowns.value.length)
+
+	if (success){
+		const addBreakdownResult = await fetch("/api/db/addBreakdown", {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+			}, // allBreakdowns, lyrics, furigana, indices, timestamps, name, artist
+			body: JSON.stringify({ 
+				allBreakdowns: allBreakdowns.value.map((breakdown) => JSON.stringify(breakdown)),
+				musicId: embeddingResponseData.externalId,
+				lyrics: lyrics.value, 
+				furigana: furiganalyzedLyrics.value, 
+				indices: lyricsIndices.value, 
+				timestamps: timestamps.value, 
+				name: song_name.value, 
+				artist: artist_name.value 
+			})
+		})
+		const addBreakdownResultData = await addBreakdownResult.json()
+		console.log(addBreakdownResultData.message)
+
+		breakdown.value = {"Special message": "Generation complete. Click on a lyric to view breakdown."}
+		phrases.value = ["Special message"]
+		translation.value = "Generation complete. Click on a lyric to show translation."
+	}
+
+	generatingBreakdowns.value = false
+
+}
+
+const fetchMusicData = async () => {
+	const lyricsResponse = await fetch(`https://lrclib.net/api/get/${lyricId}`)
+	if (!lyricsResponse.ok) {
+		throw new Error(`No song with id ${lyricId} could be found.`)
+	}
+	const lyricsData = await lyricsResponse.json()
+	if (lyricsData.length === 0) {
+		throw new Error(`No song with id ${lyricId} could be found.`)
+	}
+	song_name.value = lyricsData.trackName
+	artist_name.value = lyricsData.artistName
+
+	// get song metadata
+	const embeddingResponse = await fetch("/api/musicapi", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ song_name: song_name.value, artist_name: artist_name.value })
+	})
+	const embeddingResponseData = await embeddingResponse.json()
+	const trackUrl = embeddingResponseData.url
+	externalId.value = embeddingResponseData.externalId
+
+	// check if song has already been process before
+	const breakdownExistsResult = await fetch("/api/db/needBreakdown", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({ musicId: externalId.value })
+	})
+	const breakdownExistsData = await breakdownExistsResult.json()
+	const breakdownExists = breakdownExistsData.result
+
+	if (breakdownExists) {
+		console.log("Breakdowns already exists, fetching from database...")
+		const fetchedBreakdownResult = await fetch("/api/db/getBreakdown", {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ musicId: embeddingResponseData.externalId })
+		})
+		const fetchedBreakdownData = (await fetchedBreakdownResult.json()).data
+		console.log(fetchedBreakdownData)
+		allBreakdowns.value = fetchedBreakdownData.allBreakdowns.map((breakdown) => JSON.parse(breakdown))
+		lyrics.value = fetchedBreakdownData.lyrics
+		lyricsIndices.value = fetchedBreakdownData.indices.map(Number)
+		timestamps.value = fetchedBreakdownData.timestamps.map((row) => row.map(Number))
+		furiganalyzedLyrics.value = fetchedBreakdownData.furigana
+		song_name.value = fetchedBreakdownData.name
+		artist_name.value = fetchedBreakdownData.artist
+
+		fetchedLyrics.value = true
+		fetchedBreakdowns.value = true
+
+		try {
+			initializeSpotifyEmbed(trackUrl)
+		} catch (error) {
+			if (error instanceof Error) {
+				console.error(error.message)
+			} else{
+				console.error("error during spotify embed initialization: ", error)
+			}
+		}
+
+		embedReady.value = true
+
+		return
+	}
+
+	// song hasn't been processed before
+	const rawLyrics = lyricsData.plainLyrics.split("\n")
+	const rawSynced = lyricsData.syncedLyrics.split("\n").slice(0, -1)
+	timestamps.value = filterTimestamps(rawSynced)
+	const l = rawLyrics.length
+	let indices = new Array<number>
+	let j = 0
+
+	try {
+		initializeSpotifyEmbed(trackUrl)
+	} catch (error) {
+		if (error instanceof Error) {
+			console.error(error.message)
+		} else{
+			console.error("error during spotify embed initialization: ", error)
+		}
+	}
+
+	const furiganaPromises = rawLyrics.map((lyric: string, i: number) => {
+		if (lyric !== "") {
+			indices.push(j)
+			j++
+			return getFurigana(lyric)
+		} else {
+			indices.push(-1)
+			return Promise.resolve(null)
+		}
+	})
+
+	try {
+		const furiganaResults = await Promise.all(furiganaPromises)
+		furiganalyzedLyrics.value = furiganaResults
+	} catch (error) {
+		console.error("Error fetching furigana:", error)
+	}
+
+	lyrics.value = rawLyrics
+	lyricsIndices.value = indices
+	fetchedLyrics.value = true
+
+	if (useAi.value) {
+		await aiFetch(l, rawLyrics, embeddingResponseData)
+	} else {
+		await ichiranFetch(l, rawLyrics, embeddingResponseData)
 	}
 }
 
@@ -494,9 +589,9 @@ watch(playbackTime, (newPlaybackTime:number , oldPlaybackTime: number) => {
 
 		document.getElementById(`${currentIndex}`)!.scrollIntoView({ behavior: "smooth", block: "center" })
 	} else {
-			breakdown.value = { "Music": "🎶" }
-			phrases.value = ["Music"]
-			translation.value = "🎶"
+		breakdown.value = { "Music": "🎶" }
+		phrases.value = ["Music"]
+		translation.value = "🎶"
 	}
 })
 
