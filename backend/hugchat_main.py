@@ -21,6 +21,7 @@ main = client.containers.get("ichiran-main-1")
 main.start()
 
 def clean_input(text):
+    text = "".join(text.split(" "))
     return re.sub(r"[^\w\sぁ-んァ-ン一-龥]", "", text)
 
 def get_breakdown(text):
