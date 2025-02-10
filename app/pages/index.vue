@@ -1,7 +1,7 @@
 <template>
 	<div class="flex items-center flex-col justify-center h-full w-full gap-5">
 		<div class="max-w-5xl flex items-center flex-col justify-center h-full w-full gap-10 py-[4rem]">
-			<div class="">
+			<div v-if="useAi" class="">
 				<div class="w-full flex text-center justify-center items-center gap-3 mb-2">
 					<h1 class="">HuggingChat Credentials:</h1>
 					<div class="flex flex-col gap-1">
@@ -72,6 +72,7 @@ const noTracksFound = ref(false)
 const huggingchatEmail = ref("")
 const huggingchatPassword = ref("")
 const saved = ref(false)
+const useAi = ref(false)
 
 const getMetaData = async () => {
 	trackCandidates.value = []
@@ -101,11 +102,19 @@ onMounted(() => {
 	if (process.client) {
 		const email = localStorage.getItem("hugEmail")
 		const password = localStorage.getItem("hugSecret")
+		const ai = localStorage.getItem("useAi")
 		if (email !== null) {
 			huggingchatEmail.value = email
 		}
 		if (password !== null) {
 			huggingchatPassword.value = password
+		}
+		if (ai !== null) {
+			if (ai === "true") {
+				useAi.value = true
+			} else {
+				useAi.value = false
+			}
 		}
 	}
 })
