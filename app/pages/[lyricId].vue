@@ -32,19 +32,35 @@
 							<span class="text-orange-200">Translation</span>: {{ translation }}
 						</h1>
 					</div>
-					<div v-else>
+					<div v-else class="flex flex-col gap-1">
+						<button 
+							class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
+							@click="regenerateBreakdowns"
+						>
+							Regenerate
+						</button>
 						<div v-for="(key, i) in phrases" :key="i">
 							<div v-for="(key2, j) in breakdown[i]" :key="j">
-								<h1 class="text-[#bfe3b4]">{{ j }}</h1>
+								<h1 class="text-[#bfe3b4]">{{ j }}</h1> <!-- main breakdown -->
 								<div v-for="(key3, k) in breakdown[i][j]" :key="k">
 									<ul>
 										<li v-for="(key4, l) in key3" :key="l">
-											<h1 class="pl-3">* {{ l }}</h1>
+											<h1 v-if="Object.keys(breakdown[i][j]).length !== 1" class="pl-3">* {{ l }}</h1> <!-- breakdown component -->
 											<ul>
 												<li v-for="(key5, m) in key4" :key="m">
-													<h1 class="pl-6">
-														- {{ key5 }}
-													</h1>
+													<div v-if="m == 0" class="flex items-center pl-6 gap-2">
+														<!-- <Icon name="icons8:angle-right" size="0.8rem" /> -->
+														<Icon name="radix-icons:dot-filled" size="0.8rem" />
+														<h1>
+															{{ key5 }} <!-- component definition -->
+														</h1>
+													</div>
+													<div v-else class="flex items-center pl-6 gap-2">
+														<Icon name="radix-icons:dot-filled" size="0.8rem" />
+														<h1>
+															{{ key5 }} <!-- component definition -->
+														</h1>
+													</div>
 												</li>
 											</ul>
 										</li>
@@ -331,6 +347,7 @@ const ichiranFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) 
 
 	let success = true // no errors during breakdown fetch
 	for (let i = 0; i < l; i++){
+		console.log("Raw lyrics", i, rawLyrics[i])
 		if (rawLyrics[i] !== "" && rawLyrics[i] !== "♪"){
 			const result = await getBreakDown(rawLyrics[i], "", "", "ichiran")
 			breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
@@ -346,12 +363,10 @@ const ichiranFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) 
 			allBreakdowns.value.push(content)
 
 			progress.value = Math.floor((i + 1) / l * 100)
-			console.log("progress: ", progress.value)
-		} else {
-			allBreakdowns.value.push(null)
+			// console.log("progress: ", progress.value)
 		}
 	}
-	console.log(allBreakdowns.value.length)
+	// console.log("all breakdowns: ", allBreakdowns.value)
 
 	if (success){
 		const addBreakdownResult = await fetch("/api/db/addBreakdown", {
@@ -550,10 +565,6 @@ const handleLineClick = (i: number) => {
 		breakdown.value = cur
 		phrases.value = Object.keys(cur).filter(key => key !== "translation")
 		translation.value = cur["translation"]
-	} else {
-		breakdown.value = {"Special message": "No breakdown found for this line"}
-		phrases.value = ["Special message"]
-		translation.value = "No translation found"
 	}
 
 	const newTime = timestamps.value[i][0]
