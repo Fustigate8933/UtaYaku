@@ -25,6 +25,12 @@
 						>
 							Regenerate
 						</button>
+						<button 
+							class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
+							@click="regenerateBreakdowns"
+						>
+							Expand
+						</button>
 						<h1 v-for="(key, i) in phrases" :key="i">
 							<span class="text-[#bfe3b4]">{{ key }}</span>: {{ breakdown[key] }}
 						</h1>
@@ -33,12 +39,20 @@
 						</h1>
 					</div>
 					<div v-else class="flex flex-col gap-1">
-						<button 
-							class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
-							@click="regenerateBreakdowns"
-						>
-							Regenerate
-						</button>
+						<div class="">
+							<button
+								class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
+								@click="regenerateBreakdowns"
+							>
+								Regenerate
+							</button>
+							<button 
+								class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-10 right-2 active:text-gray-500"
+								@click="() => {expand = !expand}"
+							>
+								Expand
+							</button>
+						</div>
 						<div v-for="(key, i) in phrases" :key="i">
 							<div v-for="(key2, j) in breakdown[i]" :key="j">
 								<h1 class="text-[#bfe3b4]">{{ j }}</h1> <!-- main breakdown -->
@@ -48,14 +62,14 @@
 											<h1 v-if="Object.keys(breakdown[i][j]).length !== 1" class="pl-3">* {{ l }}</h1> <!-- breakdown component -->
 											<ul>
 												<li v-for="(key5, m) in key4" :key="m">
-													<div v-if="m == 0" class="flex items-center pl-6 gap-2">
+													<div v-if="m === 0" class="flex items-center pl-6 gap-2">
 														<!-- <Icon name="icons8:angle-right" size="0.8rem" /> -->
 														<Icon name="radix-icons:dot-filled" size="0.8rem" />
 														<h1>
 															{{ key5 }} <!-- component definition -->
 														</h1>
 													</div>
-													<div v-else class="flex items-center pl-6 gap-2">
+													<div v-if="expand && m !== 0" class="flex items-center pl-6 gap-2">
 														<Icon name="radix-icons:dot-filled" size="0.8rem" />
 														<h1>
 															{{ key5 }} <!-- component definition -->
@@ -125,6 +139,7 @@ const route = useRoute()
 const lyricId = route.params.lyricId
 import removeMd from 'remove-markdown'
 
+const expand = ref(false)
 const furigana = ref(true)
 const lyrics = ref([])
 const furiganalyzedLyrics = ref([])
@@ -353,12 +368,9 @@ const ichiranFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) 
 			breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
 			phrases.value = ["Special message"]
 			translation.value = "Your HuggingChat credentials were incorrect."
-
-			// comment this after all testing
-			// success = false
 			
 			const content = JSON.parse(result!)
-			console.log(rawLyrics[i], content)
+			// console.log(rawLyrics[i], content)
 			
 			allBreakdowns.value.push(content)
 
