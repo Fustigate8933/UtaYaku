@@ -106,7 +106,7 @@ def generate_breakdown(request: GenRequest):
             return JSONResponse(status_code=200, content={"breakdown": breakdowns})
         else:
             print(f"Exit code: {exit_code}, exit code != 0")
-            return JSONResponse(status_code=500, content={"breakdown": str(e)})
+            return JSONResponse(status_code=500, content={"breakdown": "error"})
     else:
         try:
             sign = Login(request.email, request.password)
