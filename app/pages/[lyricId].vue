@@ -19,18 +19,20 @@
 				</div>
 				<div v-else>
 					<div v-if="useAi">
-						<button 
-							class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
-							@click="regenerateBreakdowns"
-						>
-							Regenerate
-						</button>
-						<button 
-							class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
-							@click="regenerateBreakdowns"
-						>
-							Expand
-						</button>
+						<div class="absolute right-2 top-2 flex gap-1">
+							<button
+								class="border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 active:text-gray-500"
+								@click="regenerateBreakdowns"
+							>
+								Regenerate
+							</button>
+							<button 
+								class="border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 active:text-gray-500"
+								@click="() => {expand = !expand}"
+							>
+								Expand
+							</button>
+						</div>
 						<h1 v-for="(key, i) in phrases" :key="i">
 							<span class="text-[#bfe3b4]">{{ key }}</span>: {{ breakdown[key] }}
 						</h1>
@@ -39,15 +41,15 @@
 						</h1>
 					</div>
 					<div v-else class="flex flex-col gap-1">
-						<div class="">
+						<div class="absolute right-2 top-2 flex gap-1">
 							<button
-								class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-2 right-2 active:text-gray-500"
+								class="border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 active:text-gray-500"
 								@click="regenerateBreakdowns"
 							>
 								Regenerate
 							</button>
 							<button 
-								class="absolute border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 top-10 right-2 active:text-gray-500"
+								class="border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-gray-500 hover:text-gray-400 active:text-gray-500"
 								@click="() => {expand = !expand}"
 							>
 								Expand
