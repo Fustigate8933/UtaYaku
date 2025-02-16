@@ -412,6 +412,13 @@ const ichiranFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) 
 }
 
 const fetchMusicData = async () => {
+	if (process.client) {
+		const use_ai = localStorage.getItem("useAi")
+		if (use_ai !== null) {
+			useAi.value = use_ai
+		}
+	}
+
 	const lyricsResponse = await fetch(`https://lrclib.net/api/get/${lyricId}`)
 	if (!lyricsResponse.ok) {
 		throw new Error(`No song with id ${lyricId} could be found.`)
