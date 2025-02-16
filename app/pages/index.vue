@@ -1,6 +1,10 @@
 <template>
-	<div class="flex items-center flex-col justify-center h-full w-full gap-5">
+	<div class="flex items-center flex-col justify-center h-full w-full gap-5 relative">
 		<div class="max-w-5xl flex items-center flex-col justify-center h-full w-full gap-10 py-[4rem]">
+			<div class="absolute inline-flex items-center cursor-pointer top-2 right-2" @click="useAiToggle">
+				<input type="checkbox" value="" class="sr-only peer" :checked="useAi">
+				<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			</div>
 			<div v-if="useAi" class="">
 				<div class="w-full flex text-center justify-center items-center gap-3 mb-2">
 					<h1 class="">HuggingChat Credentials:</h1>
@@ -13,7 +17,7 @@
 					<button class="h-full rounded-lg hover:cursor-pointer border-2 border-gray-400 hover:border-white active:border-gray-400 px-2 py-1" @click="saveCredentials">{{ saved ? 'Saved' : 'Save' }}</button>
 				</div>
 				<ul class="ml-3 text-sm text-gray-400">
-					<li>* Please provide your credentials from <span class="text-blue-300 underline"><a href="https://huggingface.co/chat/" target="_blank">HuggingChat</a></span>(free) as lyric analysis requires it.</li>
+					<li>* Please provide your credentials from <span class="text-blue-300 underline"><a href="https://huggingface.co/chat/" target="_blank">HuggingChat</a></span>(free) as ai analysis requires it.</li>
 					<li>* It's best to use a throwaway account for concerns of privacy and chat modification.</li>
 				</ul>
 			</div>
@@ -95,6 +99,13 @@ const saveCredentials = () => {
 		localStorage.setItem("hugEmail", huggingchatEmail.value)
 		localStorage.setItem("hugSecret", huggingchatPassword.value)
 		saved.value = true
+	}
+}
+
+const useAiToggle = () => {
+	if (process.client) {
+		useAi.value = !useAi.value
+		localStorage.setItem("useAi", useAi.value)
 	}
 }
 
