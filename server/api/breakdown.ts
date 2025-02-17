@@ -3,8 +3,8 @@ export default defineEventHandler(async (event) => {
 
 	console.log("Fetching break down from backend...")
 	
-	const uri = "http://localhost:8000"
-	// const uri = "https://y36chang.csclub.cloud/"
+	// const uri = "http://localhost:8000"
+	const uri = "https://y36chang.csclub.cloud/"
 	const response = await fetch(uri, {
 		method: "POST",
 		headers: {

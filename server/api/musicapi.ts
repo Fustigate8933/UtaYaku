@@ -2,13 +2,16 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 	console.log(body)
   const { song_name, artist_name } = body
+	
+	const runtimeConfig = useRuntimeConfig()
+
 	try {
 		const searchResponse = await fetch("https://api.musicapi.com/public/search", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 				"Accept": "application/json",
-				"Authorization": `Token ${process.env.CLIENT_ID}`
+				"Authorization": `Token ${runtimeConfig.private.CLIENT_ID}`
 			},
 			body: JSON.stringify({
 				type: "track",

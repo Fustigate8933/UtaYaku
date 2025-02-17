@@ -8,6 +8,16 @@ export default defineNuxtConfig({
 		host: "0.0.0.0"
 	},
 
+	runtimeConfig: {
+		private: {
+			CLIENT_ID: process.env.CLIENT_ID,
+			DB_URL: process.env.DB_URL,
+			SUPABASE_URL: process.env.SUPABASE_URL,
+			SUPABASE_KEY: process.env.SUPABASE_KEY,
+			SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
+		}
+	},
+
 	supabase: {
 		redirect: false
 	},
