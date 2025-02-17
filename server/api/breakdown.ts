@@ -1,9 +1,10 @@
 export default defineEventHandler(async (event) => {
 	const { req, email, password, breakdown_type } = await readBody(event)
 
-	console.log("Fetching break down from FastAPI...")
+	console.log("Fetching break down from backend...")
 	
-	const uri = "https://y36chang.csclub.cloud/"
+	const uri = "http://localhost:8000"
+	// const uri = "https://y36chang.csclub.cloud/"
 	const response = await fetch(uri, {
 		method: "POST",
 		headers: {

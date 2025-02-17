@@ -95,7 +95,7 @@ const getMetaData = async () => {
 }
 
 const saveCredentials = () => {
-	if (process.client) {
+	if (import.meta.client) {
 		localStorage.setItem("hugEmail", huggingchatEmail.value)
 		localStorage.setItem("hugSecret", huggingchatPassword.value)
 		saved.value = true
@@ -103,14 +103,14 @@ const saveCredentials = () => {
 }
 
 const useAiToggle = () => {
-	if (process.client) {
+	if (import.meta.client) {
 		useAi.value = !useAi.value
 		localStorage.setItem("useAi", useAi.value)
 	}
 }
 
 onMounted(() => {
-	if (process.client) {
+	if (import.meta.client) {
 		const email = localStorage.getItem("hugEmail")
 		const password = localStorage.getItem("hugSecret")
 		const ai = localStorage.getItem("useAi")
