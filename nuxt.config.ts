@@ -1,5 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import fs from 'node:fs'
+import path from 'node:path'
+
 export default defineNuxtConfig({
+	devServer: {
+		port: 80,
+		host: "0.0.0.0"
+	},
+
 	supabase: {
 		redirect: false
 	},
@@ -25,5 +33,28 @@ export default defineNuxtConfig({
 		families: [
 			{name: "Roboto Mono", provider: "fontsource"}
 		]
-	}
+	},
+
+	hooks: {
+    'build:done'() {
+      const sourceDir = path.resolve(__dirname, 'node_modules/kuromoji/dict');
+      const destinationDir = path.resolve(__dirname, '.output/server/node_modules/kuromoji/dict');
+
+			console.log('Source Directory:', sourceDir);
+			console.log('Destination Directory:', destinationDir);
+
+			if (!fs.existsSync(sourceDir)) {
+				console.error('Source directory does not exist:', sourceDir);
+				return;
+			}
+
+			if (!fs.existsSync(destinationDir)) {
+				console.log('Creating destination directory:', destinationDir);
+				fs.mkdirSync(destinationDir, { recursive: true });
+			}
+
+			fs.cpSync(sourceDir, destinationDir, { recursive: true });
+      console.log('Kuromoji dictionary files copied successfully.');
+    },
+  }
 })
