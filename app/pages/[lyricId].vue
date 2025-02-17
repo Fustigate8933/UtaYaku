@@ -1,6 +1,10 @@
 <template>
 	<div class="flex items-center flex-col justify-center h-full w-full gap-5">
 		<div class="max-w-4xl flex items-center flex-col h-full w-full gap-4 py-[3rem]">
+			<div class="absolute inline-flex items-center cursor-pointer top-2 right-2" @click="useAiToggle">
+				<input type="checkbox" value="" class="sr-only peer" :checked="useAi">
+				<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+			</div>
 			<NuxtLink to="/" class="self-start border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-lg text-gray-400 hover:text-white active:text-gray-500">
 				Home
 			</NuxtLink>
@@ -184,6 +188,13 @@ function timestampToMS(timestamp: string){
 	return ans
 }
 
+const useAiToggle = () => {
+	if (import.meta.client) {
+		useAi.value = !useAi.value
+		localStorage.setItem("useAi", useAi.value)
+	}
+}
+
 const filterTimestamps = (rawSynced: Array<string>) => {
 	const matches = rawSynced.map(line => line.match(/\[\d{2}:\d{2}\.\d{2}\]/)![0]).map(timestamp => timestampToMS(timestamp))
 	const l = matches.length
@@ -227,7 +238,7 @@ const aiFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) => {
 	try {
 		let email = ""
 		let password = ""
-		if (process.client) {
+		if (import.meta.client) {
 			const hugEmail = localStorage.getItem("hugEmail")
 			if (hugEmail !== null){
 				email = hugEmail
@@ -265,8 +276,8 @@ const aiFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) => {
 						}
 
 						console.log(`Processing batch ${batchCount.value}`)
-						// const result = await getBreakDown(buffer, email, password, "huggingchat")
-						let result = removeMd((await getOpenAIBreakDown(buffer)).content.replace(/\n\s+/g, "")).replace("`", "")
+						const result = await getBreakDown(buffer, email, password, "huggingchat")
+						// let result = removeMd((await getOpenAIBreakDown(buffer)).content.replace(/\n\s+/g, "")).replace("`", "")
 						if (result === "wrong username or password"){
 							breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
 							phrases.value = ["Special message"]
@@ -296,8 +307,8 @@ const aiFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) => {
 				}
 
 				console.log(`Processing batch ${batchCount.value}`)
-				// const result = await getBreakDown(buffer, email, password, "huggingchat")
-				let result = removeMd((await getOpenAIBreakDown(buffer)).content.replace(/\n\s+/g, "")).replace("`", "")
+				const result = await getBreakDown(buffer, email, password, "huggingchat")
+				// let result = removeMd((await getOpenAIBreakDown(buffer)).content.replace(/\n\s+/g, "")).replace("`", "")
 
 				if (result === "wrong username or password"){
 					breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
@@ -412,10 +423,14 @@ const ichiranFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) 
 }
 
 const fetchMusicData = async () => {
-	if (process.client) {
+	if (import.meta.client) {
 		const use_ai = localStorage.getItem("useAi")
 		if (use_ai !== null) {
-			useAi.value = use_ai
+			if (use_ai == "true") {
+				useAi.value = true 
+			} else {
+				useAi.value = false 
+			}
 		}
 	}
 
