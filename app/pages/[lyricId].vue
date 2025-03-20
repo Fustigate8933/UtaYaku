@@ -394,6 +394,7 @@ const ichiranFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) 
 	// console.log("all breakdowns: ", allBreakdowns.value)
 
 	if (success){
+		console.log("Saving breakdowns")
 		const addBreakdownResult = await fetch("/api/db/addBreakdown", {
 			method: "POST",
 			headers: {
@@ -506,6 +507,7 @@ const fetchMusicData = async () => {
 	}
 
 	// song hasn't been processed before
+	console.log("Breakdown doesn't exist")
 	const rawLyrics = lyricsData.plainLyrics.split("\n")
 	const rawSynced = lyricsData.syncedLyrics.split("\n").slice(0, -1)
 	timestamps.value = filterTimestamps(rawSynced)
