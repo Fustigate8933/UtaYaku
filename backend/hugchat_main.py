@@ -7,29 +7,33 @@ from hugchat.login import Login
 import docker
 import json
 import re
+import subprocess
 
 app = FastAPI()
 
-cookie_path_dir = "./cookies/"
+# cookie_path_dir = "./cookies/"
+#
+# client = docker.from_env()
+#
+# pg = client.containers.get("ichiran-pg-1")
+# pg.start()
+#
+# main = client.containers.get("ichiran-main-1")
+# main.start()
 
-client = docker.from_env()
-
-pg = client.containers.get("ichiran-pg-1")
-pg.start()
-
-main = client.containers.get("ichiran-main-1")
-main.start()
+cmd = '/home/fustigate/quicklisp/local-projects/ichiran/ichiran-cli -f -l 5 "{}"'
 
 def clean_input(text):
     text = "".join(text.split(" "))
     return re.sub(r"[^\w\sぁ-んァ-ン一-龥]", "", text)
 
 def get_breakdown(text):
-    exit_code, output = main.exec_run(f'ichiran-cli -f "{clean_input(text)}"')
+    # exit_code, output = main.exec_run(f'ichiran-cli -f "{clean_input(text)}"')
+    output = subprocess.check_output(cmd.format(clean_input(text)), shell=True)
     breakdowns = []
 
-    if exit_code != 0:
-        return exit_code, breakdowns
+    # if exit_code != 0:
+    #     return exit_code, breakdowns
 
     output = output.decode("utf-8")
     output = "\n".join(line for line in output.splitlines() if not re.search(r"WARNING", line))
@@ -88,7 +92,7 @@ def get_breakdown(text):
 
         breakdowns.append(entry)
 
-    return exit_code, breakdowns
+    return 0, breakdowns
 
 
 class GenRequest(BaseModel):
