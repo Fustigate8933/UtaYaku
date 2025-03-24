@@ -5,14 +5,14 @@
 			<!-- 	<input type="checkbox" value="" class="sr-only peer" :checked="useAi"> -->
 			<!-- 	<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div> -->
 			<!-- </div> -->
+			<NuxtLink to="/" class="absolute top-2 left-2 self-start border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-lg text-gray-400 hover:text-white active:text-gray-500">
+				Home
+			</NuxtLink>
 			<div class="absolute inline-flex items-center cursor-pointer top-2 right-2" @click="loopToggle">
 				<h1 class="mr-2 text-gray-300">Loop</h1>
 				<input type="checkbox" value="" class="sr-only peer" :checked="loop">
 				<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 			</div>
-			<NuxtLink to="/" class="self-start border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-lg text-gray-400 hover:text-white active:text-gray-500">
-				Home
-			</NuxtLink>
 			<div class="flex gap-3 items-baseline border-white border-b"> <h1 class="text-5xl text-yellow-100">{{song_name}}</h1>
 				<h1 class="text-xl text-orange-200">({{artist_name}})</h1>
 			</div>
