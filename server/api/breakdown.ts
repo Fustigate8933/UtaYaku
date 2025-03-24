@@ -10,10 +10,10 @@ export default defineEventHandler(async (event) => {
 		headers: {
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify({ query: req, email: email, password: password, breakdown_type: breakdown_type })
+		body: JSON.stringify({ queries: req, email: email, password: password, breakdown_type: breakdown_type })
 	})
 	const data = await response.json()
 
-	return data.breakdown
+	return data
 })
 

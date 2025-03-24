@@ -1,8 +1,13 @@
 <template>
 	<div class="flex items-center flex-col justify-center h-full w-full gap-5">
 		<div class="max-w-4xl flex items-center flex-col h-full w-full gap-4 py-[3rem]">
-			<div class="absolute inline-flex items-center cursor-pointer top-2 right-2" @click="useAiToggle">
-				<input type="checkbox" value="" class="sr-only peer" :checked="useAi">
+			<!-- <div class="absolute inline-flex items-center cursor-pointer top-2 right-2" @click="useAiToggle"> -->
+			<!-- 	<input type="checkbox" value="" class="sr-only peer" :checked="useAi"> -->
+			<!-- 	<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div> -->
+			<!-- </div> -->
+			<div class="absolute inline-flex items-center cursor-pointer top-2 right-2" @click="loopToggle">
+				<h1 class="mr-2 text-gray-300">Loop</h1>
+				<input type="checkbox" value="" class="sr-only peer" :checked="loop">
 				<div class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
 			</div>
 			<NuxtLink to="/" class="self-start border-2 border-gray-400 hover:cursor-pointer rounded-lg px-2 text-lg text-gray-400 hover:text-white active:text-gray-500">
@@ -176,6 +181,8 @@ const song_name = ref("Fetching song name")
 const artist_name = ref("Fetching artist name")
 
 const offset = ref(0)
+const loop = ref(false)
+const duration = ref(null)
 
 function timestampToMS(timestamp: string){
 	const [minutes, seconds, milliseconds] = timestamp.slice(1, -1).split(/[:.]/).map(Number)
@@ -186,6 +193,10 @@ function timestampToMS(timestamp: string){
 		ans = (minutes! * 60) + seconds!
 	}
 	return ans
+}
+
+const loopToggle = () => {
+	loop.value = !loop.value
 }
 
 const useAiToggle = () => {
@@ -374,24 +385,28 @@ const ichiranFetch = async (l: any, rawLyrics: any, embeddingResponseData: any) 
 	generatingBreakdowns.value = true
 
 	let success = true // no errors during breakdown fetch
-	for (let i = 0; i < l; i++){
-		console.log("Raw lyrics", i, rawLyrics[i])
-		if (rawLyrics[i] !== "" && rawLyrics[i] !== "♪"){
-			const result = await getBreakDown(rawLyrics[i], "", "", "ichiran")
-			breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
-			phrases.value = ["Special message"]
-			translation.value = "Your HuggingChat credentials were incorrect."
-			
-			const content = JSON.parse(result!)
-			// console.log(rawLyrics[i], content)
-			
-			allBreakdowns.value.push(content)
-
-			progress.value = Math.floor((i + 1) / l * 100)
-			// console.log("progress: ", progress.value)
-		}
-	}
-	// console.log("all breakdowns: ", allBreakdowns.value)
+	const filtered = rawLyrics.filter((lyric) => (lyric !== "" && lyric !== "♪"))
+	const results = await getBreakDown(filtered, "", "", "ichiran")
+	// console.log("results: ", results)
+	allBreakdowns.value = JSON.parse(results!)
+	// for (let i = 0; i < l; i++){
+	// 	console.log("Raw lyrics", i, rawLyrics[i])
+	// 	if (rawLyrics[i] !== "" && rawLyrics[i] !== "♪"){
+	// 		const result = await getBreakDown(rawLyrics[i], "", "", "ichiran")
+	// 		breakdown.value = {"Special message": "Your HuggingChat credentials were incorrect."}
+	// 		phrases.value = ["Special message"]
+	// 		translation.value = "Your HuggingChat credentials were incorrect."
+	// 		
+	// 		const content = JSON.parse(result!)
+	// 		// console.log(rawLyrics[i], content)
+	// 		
+	// 		allBreakdowns.value.push(content)
+	//
+	// 		progress.value = Math.floor((i + 1) / l * 100)
+	// 		// console.log("progress: ", progress.value)
+	// 	}
+	// }
+	console.log("all breakdowns: ", typeof allBreakdowns.value, allBreakdowns.value)
 
 	if (success){
 		console.log("Saving breakdowns")
@@ -586,7 +601,11 @@ const initializeSpotifyEmbed = (trackUrl: string) => {
 		const callback = (EmbedController: EmbedControllerType) => {
 			embedController = EmbedController
 			EmbedController.addListener("playback_update", (state) => {
-				playbackTime.value = state.data.position
+				if (loop.value && state.data.position === state.data.duration) {
+					embedController.restart()
+				} else {
+					playbackTime.value = state.data.position
+				}
 			})
 			EmbedController.addListener('ready', () => {
 				console.log("embedder ready")
@@ -644,8 +663,20 @@ watch(playbackTime, (newPlaybackTime:number , oldPlaybackTime: number) => {
 	}
 })
 
+const handleKeydown = (event: KeyboardEvent) => {
+	if (event.key === " " || event.keyCode === 32) {
+    event.preventDefault()
+    if (embedController) {
+      embedController.togglePlay()
+    } else {
+      console.error("Embed Controller not initialized")
+    }
+  }
+}
+
 onMounted(() => {
 	fetchMusicData()
+	document.addEventListener("keydown", handleKeydown)
 })
 </script>
 
