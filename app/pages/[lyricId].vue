@@ -663,20 +663,27 @@ watch(playbackTime, (newPlaybackTime:number , oldPlaybackTime: number) => {
 	}
 })
 
-const handleKeydown = (event: KeyboardEvent) => {
-	if (event.key === " " || event.keyCode === 32) {
-    event.preventDefault()
-    if (embedController) {
-      embedController.togglePlay()
-    } else {
-      console.error("Embed Controller not initialized")
-    }
-  }
+const handleKeyup = (event: KeyboardEvent) => {
+	event.preventDefault()
+	if (embedController) {
+		console.log("Detected Click")
+		if (event.key === " " || event.keyCode === 32) {
+			embedController.togglePlay()
+		} else if (event.key === "ArrowLeft" || event.keyCode === 37) {
+			const playbackInSeconds = Math.floor(playbackTime.value / 1000)
+			embedController.seek(Math.max(0, playbackInSeconds - 5))
+		} else if (event.key === "ArrowRight" || event.keyCode === 39) {
+			const playbackInSeconds = Math.floor(playbackTime.value / 1000)
+			embedController.seek(Math.max(0, playbackInSeconds + 5))
+		}
+	} else {
+		console.error("Embed Controller not initialized")
+	}
 }
 
 onMounted(() => {
 	fetchMusicData()
-	document.addEventListener("keydown", handleKeydown)
+	document.addEventListener("keyup", handleKeyup)
 })
 </script>
 
