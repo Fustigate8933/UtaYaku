@@ -20,7 +20,7 @@
               class="rounded-lg px-2 py-1 text-black"
               type="text"
               placeholder="Email"
-            />
+            >
           </div>
           <div class="flex flex-col gap-1">
             <input
@@ -28,7 +28,7 @@
               class="rounded-lg px-2 py-1 text-black"
               type="password"
               placeholder="Password"
-            />
+            >
           </div>
           <button
             class="h-full rounded-lg hover:cursor-pointer border-2 border-gray-400 hover:border-white active:border-gray-400 px-2 py-1"
@@ -61,7 +61,7 @@
             type="text"
             placeholder="曲名"
             @keyup.enter="getMetaData"
-          />
+          >
         </div>
         <div class="flex flex-col gap-1">
           <label
@@ -74,7 +74,7 @@
             type="text"
             placeholder="アーティスト名"
             @keyup.enter="getMetaData"
-          />
+          >
         </div>
         <div class="flex flex-col gap-1">
           <!-- <label class="invisible">Easter egg!</label> -->
@@ -101,8 +101,8 @@
           <h1 class="text-center">No tracks could be found.</h1>
         </div>
         <div
-          v-else
           v-for="(candidate, i) in trackCandidates"
+          v-else
           :key="i"
           class="border-2 rounded-xl border-[#4d4e51] p-4"
         >
