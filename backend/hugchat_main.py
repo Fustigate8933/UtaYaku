@@ -25,7 +25,7 @@ async def get_breakdown(text):
     stdout, stderr = await process.communicate()
 
     if process.returncode != 0:
-        return {"error": f"Failed for {text}"}
+        return {"error": f"{stderr}"}
 
     output = stdout.decode("utf-8")
     output = "\n".join(line for line in output.splitlines() if not re.search(r"WARNING", line))
